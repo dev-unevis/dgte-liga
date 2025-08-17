@@ -1,0 +1,205 @@
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Person as PersonIcon,
+} from "@mui/icons-material";
+import {
+  Autocomplete,
+  Avatar,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemSecondaryAction,
+  ListItemText,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useState } from "react";
+import type { EditGroupModalProps, Member } from "../types";
+
+export default function EditGroupModal({
+  open,
+  onClose,
+  groupName,
+  currentMembers,
+  availableMembers,
+  onSave,
+}: EditGroupModalProps) {
+  const [members, setMembers] = useState<Member[]>(currentMembers);
+  const [selectedMembers, setSelectedMembers] = useState<Member[]>([]);
+
+  const handleAddMembers = () => {
+    const newMembers = selectedMembers.filter(
+      (sm) => !members.some((m) => m.id === sm.id)
+    );
+    if (newMembers.length > 0) {
+      setMembers([...members, ...newMembers]);
+      setSelectedMembers([]); // reset selection
+    }
+  };
+
+  // Filter available members to exclude those already in the group
+  const filteredAvailableMembers = availableMembers.filter(
+    (member) => !members.some((m) => m.id === member.id)
+  );
+
+  const handleRemoveMember = (memberId: string) => {
+    setMembers(members.filter((m) => m.id !== memberId));
+  };
+
+  const handleSave = () => {
+    onSave(members);
+    onClose();
+  };
+
+  const handleCancel = () => {
+    setMembers(currentMembers); // Reset to original state
+    setSelectedMembers([]);
+    onClose();
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={handleCancel}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: { borderRadius: 2 },
+      }}
+    >
+      <DialogTitle sx={{ pb: 1 }}>
+        <Typography variant="h6" component="div">
+          Uredi Grupu - {groupName}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {members.length} članova
+        </Typography>
+      </DialogTitle>
+
+      <DialogContent sx={{ pt: 2 }}>
+        {/* Add Member Section */}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle2" sx={{ mb: 2 }}>
+            Dodaj člana
+          </Typography>
+          <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
+            <Autocomplete
+              multiple
+              sx={{ flex: 1 }}
+              options={filteredAvailableMembers}
+              getOptionLabel={(option) =>
+                `${option.firstName} ${option.lastName}`
+              }
+              value={selectedMembers}
+              onChange={(_, newValue) => setSelectedMembers(newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Izaberi člana"
+                  variant="outlined"
+                  size="small"
+                />
+              )}
+              renderOption={(props, option) => (
+                <Box component="li" {...props}>
+                  <Avatar
+                    sx={{ mr: 2, width: 32, height: 32, fontSize: "0.875rem" }}
+                  >
+                    {option.avatar}
+                  </Avatar>
+                  <p>{`${option.firstName} ${option.lastName}`}</p>
+                </Box>
+              )}
+              noOptionsText="Nema dostupnih članova"
+            />
+            <IconButton
+              onClick={handleAddMembers}
+              disabled={!selectedMembers.length}
+              color="primary"
+              sx={{ mb: 0.5 }}
+            >
+              <AddIcon />
+            </IconButton>
+          </Box>
+        </Box>
+
+        {/* Current Members List */}
+        <Box>
+          <Typography variant="subtitle2" sx={{ mb: 2 }}>
+            Trenutni članovi
+          </Typography>
+          {members.length === 0 ? (
+            <Box
+              sx={{
+                textAlign: "center",
+                py: 4,
+                color: "text.secondary",
+                border: "2px dashed",
+                borderColor: "divider",
+                borderRadius: 1,
+              }}
+            >
+              <PersonIcon sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
+              <Typography variant="body2">Nema članova u grupi</Typography>
+            </Box>
+          ) : (
+            <List
+              sx={{
+                bgcolor: "background.paper",
+                borderRadius: 1,
+                border: 1,
+                borderColor: "divider",
+              }}
+            >
+              {members.map((member, index) => (
+                <ListItem key={member.id} divider={index < members.length - 1}>
+                  <ListItemAvatar>
+                    <Avatar sx={{ bgcolor: "primary.main" }}>
+                      {member.avatar}
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={`${member.firstName} ${member.lastName}`}
+                    secondary={`Poredak - ${index + 1}`}
+                  />
+                  <ListItemSecondaryAction>
+                    <IconButton
+                      edge="end"
+                      onClick={() => handleRemoveMember(member.id)}
+                      color="error"
+                      size="small"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Box>
+      </DialogContent>
+
+      <DialogActions sx={{ px: 3, pb: 3 }}>
+        <Button onClick={handleCancel} color="inherit">
+          Odustani
+        </Button>
+        <Button
+          onClick={handleSave}
+          variant="contained"
+          color="primary"
+          startIcon={<PersonIcon />}
+        >
+          Spremi
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}

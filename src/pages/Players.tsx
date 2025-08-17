@@ -25,7 +25,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { playersData } from "./playersData";
+import { playersData } from "../playersData";
 
 export default function Players() {
   const [searchTerm, setSearchTerm] = useState("");

@@ -17,7 +17,7 @@ import {
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import type React from "react";
 import { useState } from "react";
-import { app } from "../firebase";
+import { app } from "../../firebase";
 
 export default function Login() {
   const [email, setEmail] = useState("");

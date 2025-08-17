@@ -2,14 +2,14 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router";
-import Groups from "./Groups.tsx";
+import Groups from "./pages/Groups.tsx";
 import "./index.css";
 import Layout from "./layout.tsx";
-import Login from "./Login.tsx";
-import Players from "./Players.tsx";
+import Login from "./pages/Login.tsx";
+import Players from "./pages/Players.tsx";
 import Redirect from "./Redirect.tsx";
-import { Sidebar } from "./Sidebar.tsx";
 import theme from "./theme.ts";
+import { Sidebar } from "./sidebar.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

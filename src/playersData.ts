@@ -223,4 +223,8 @@ export const playersData = [
     phone: "+385 98 414 1515",
     email: "ema.covic@email.com",
   },
-];
+].map((t) => ({
+  ...t,
+  avatar: `${t.firstName[0]}${t.lastName[0]}`,
+  id: t.id.toString(),
+}));
