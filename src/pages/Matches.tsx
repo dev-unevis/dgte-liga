@@ -2,7 +2,7 @@ import {
   Close as CloseIcon,
   Edit as EditIcon,
   Save as SaveIcon,
-  Schedule
+  Schedule,
 } from "@mui/icons-material";
 import {
   Alert,
@@ -27,7 +27,9 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { useState } from "react";
 import groups from "../constants/groups";
@@ -59,7 +61,8 @@ export default function Matches() {
     severity: "success" as "success" | "error",
   });
   const [modalOpen, setModalOpen] = useState(false);
-
+  const muiTheme = useTheme();
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
   const getPlayer = (id: string) => {
     const player = players.find((p) => p.id.toString() === id);
     return player;
@@ -369,11 +372,12 @@ export default function Matches() {
         onClose={handleModalClose}
         maxWidth="md"
         fullWidth
-        fullScreen={false}
+        fullScreen={isMobile}
         sx={{
           "& .MuiDialog-paper": {
-            margin: { xs: 1, sm: 2 },
-            maxHeight: { xs: "95vh", sm: "90vh" },
+            margin: { xs: 0, sm: 2 },
+            maxHeight: { xs: "100vh", sm: "90vh" },
+            borderRadius: { xs: 0, sm: 2 },
           },
         }}
       >
@@ -383,14 +387,19 @@ export default function Matches() {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography variant="h6">Unesite rezultate meča</Typography>
+            <Typography
+              variant="h6"
+              sx={{ fontSize: { xs: "1.1rem", sm: "1.25rem" } }}
+            >
+              Unesite rezultate meča
+            </Typography>
             <IconButton onClick={handleModalClose} size="small">
               <CloseIcon />
             </IconButton>
           </Box>
         </DialogTitle>
 
-        <DialogContent dividers>
+        <DialogContent dividers sx={{ px: { xs: 2, sm: 3 } }}>
           {selectedMatch && (
             <>
               <Box
@@ -400,18 +409,26 @@ export default function Matches() {
                 mb={3}
                 gap={2}
               >
-                <Box display="flex" alignItems="center" gap={2}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  gap={2}
+                  width={{ xs: "100%", sm: "auto" }}
+                >
                   <Avatar
                     sx={{
                       bgcolor: playerOneGroup?.color + ".main",
-                      width: 48,
-                      height: 48,
+                      width: { xs: 40, sm: 48 },
+                      height: { xs: 40, sm: 48 },
                     }}
                   >
                     {playerOne?.avatar}
                   </Avatar>
                   <Box>
-                    <Typography variant="h6">
+                    <Typography
+                      variant="h6"
+                      sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
+                    >
                       {playerOne?.firstName} {playerOne?.lastName}
                     </Typography>
                     <Chip
@@ -422,13 +439,28 @@ export default function Matches() {
                   </Box>
                 </Box>
 
-                <Typography variant="h5" color="text.secondary">
+                <Typography
+                  variant="h5"
+                  color="text.secondary"
+                  sx={{
+                    fontSize: { xs: "1.1rem", sm: "1.5rem" },
+                  }}
+                >
                   PROTIV
                 </Typography>
 
-                <Box display="flex" alignItems="center" gap={2}>
-                  <Box textAlign="right">
-                    <Typography variant="h6">
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="flex-end"
+                  gap={2}
+                  width={{ xs: "100%", sm: "auto" }}
+                >
+                  <Box textAlign={{ xs: "left", sm: "right" }}>
+                    <Typography
+                      variant="h6"
+                      sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
+                    >
                       {playerTwo?.firstName} {playerTwo?.lastName}
                     </Typography>
                     <Chip
@@ -440,8 +472,8 @@ export default function Matches() {
                   <Avatar
                     sx={{
                       bgcolor: playerTwoGroup?.color + ".main",
-                      width: 48,
-                      height: 48,
+                      width: { xs: 40, sm: 48 },
+                      height: { xs: 40, sm: 48 },
                     }}
                   >
                     {playerTwo?.avatar}
@@ -451,7 +483,11 @@ export default function Matches() {
 
               {selectedMatch.status !== "Završen" && (
                 <>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography
+                    variant="h6"
+                    gutterBottom
+                    sx={{ fontSize: { xs: "1.1rem", sm: "1.25rem" } }}
+                  >
                     Zakazano vrijeme
                   </Typography>
                   <Box mb={3}>
@@ -467,22 +503,39 @@ export default function Matches() {
                       InputLabelProps={{
                         shrink: true,
                       }}
+                      sx={{
+                        "& .MuiInputBase-input": {
+                          fontSize: { xs: "0.9rem", sm: "1rem" },
+                        },
+                      }}
                     />
                   </Box>
                   <Divider sx={{ mb: 3 }} />
                 </>
               )}
 
-              <Typography variant="h6" gutterBottom>
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{ fontSize: { xs: "1.1rem", sm: "1.25rem" } }}
+              >
                 Rezultati setova
               </Typography>
 
               {selectedMatch.sets.map((set, index) => (
-                <Box key={index} mb={2}>
-                  <Typography variant="subtitle1" gutterBottom>
+                <Box key={index} mb={3}>
+                  <Typography
+                    variant="subtitle1"
+                    gutterBottom
+                    sx={{ fontSize: { xs: "1rem", sm: "1.1rem" } }}
+                  >
                     {index + 1}. set
                   </Typography>
-                  <Grid container spacing={2} alignItems="center">
+                  <Grid
+                    container
+                    spacing={{ xs: 1, sm: 2 }}
+                    alignItems="center"
+                  >
                     <Grid>
                       <TextField
                         fullWidth
@@ -496,10 +549,24 @@ export default function Matches() {
                             Number.parseInt(e.target.value) || 0,
                           )}
                         inputProps={{ min: 0, max: 20 }}
+                        sx={{
+                          "& .MuiInputBase-input": {
+                            fontSize: { xs: "0.9rem", sm: "1rem" },
+                            padding: { xs: "12px", sm: "16.5px 14px" },
+                          },
+                          "& .MuiInputLabel-root": {
+                            fontSize: { xs: "0.85rem", sm: "1rem" },
+                          },
+                        }}
                       />
                     </Grid>
                     <Grid textAlign="center">
-                      <Typography variant="h6">-</Typography>
+                      <Typography
+                        variant="h6"
+                        sx={{ fontSize: { xs: "1.2rem", sm: "1.5rem" } }}
+                      >
+                        -
+                      </Typography>
                     </Grid>
                     <Grid>
                       <TextField
@@ -514,6 +581,15 @@ export default function Matches() {
                             Number.parseInt(e.target.value) || 0,
                           )}
                         inputProps={{ min: 0, max: 20 }}
+                        sx={{
+                          "& .MuiInputBase-input": {
+                            fontSize: { xs: "0.9rem", sm: "1rem" },
+                            padding: { xs: "12px", sm: "16.5px 14px" },
+                          },
+                          "& .MuiInputLabel-root": {
+                            fontSize: { xs: "0.85rem", sm: "1rem" },
+                          },
+                        }}
                       />
                     </Grid>
                   </Grid>
@@ -521,7 +597,11 @@ export default function Matches() {
               ))}
 
               <Box mb={3}>
-                <Typography variant="h6" gutterBottom>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ fontSize: { xs: "1.1rem", sm: "1.25rem" } }}
+                >
                   Pobjednik meča
                 </Typography>
                 <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
@@ -530,24 +610,36 @@ export default function Matches() {
                     const winner = getPlayer(winnerId);
                     const winnerGroup = getPlayerGroup(winnerId);
 
-                    return winner
+                    return winnerId && winner
                       ? (
                         <>
                           <Avatar
                             sx={{
                               bgcolor: winnerGroup?.color + ".main",
+                              width: { xs: 32, sm: 40 },
+                              height: { xs: 32, sm: 40 },
                             }}
                           >
                             {winner.avatar}
                           </Avatar>
-                          <Typography variant="h6">
+                          <Typography
+                            variant="h6"
+                            sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
+                          >
                             {winner.firstName} {winner.lastName}
                           </Typography>
-                          <Chip label="Pobjednik" color="success" />
+                          <Chip
+                            label="Pobjednik"
+                            color="success"
+                            size={isMobile ? "small" : "medium"}
+                          />
                         </>
                       )
                       : (
-                        <Typography color="text.secondary">
+                        <Typography
+                          color="text.secondary"
+                          sx={{ fontSize: { xs: "0.9rem", sm: "1rem" } }}
+                        >
                           Pobjednik će biti automatski određen na osnovu
                           osvojenih setova
                         </Typography>
@@ -559,14 +651,27 @@ export default function Matches() {
           )}
         </DialogContent>
 
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={handleModalClose} variant="outlined">
+        <DialogActions
+          sx={{
+            p: { xs: 2, sm: 2 },
+            flexDirection: { xs: "column", sm: "row" },
+            gap: { xs: 1, sm: 0 },
+          }}
+        >
+          <Button
+            onClick={handleModalClose}
+            variant="outlined"
+            fullWidth={isMobile}
+            sx={{ order: { xs: 2, sm: 1 } }}
+          >
             Odustani
           </Button>
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
             onClick={saveMatchResults}
+            fullWidth={isMobile}
+            sx={{ order: { xs: 1, sm: 2 } }}
           >
             Spremi rezultate
           </Button>
