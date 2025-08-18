@@ -13,11 +13,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { playersData } from "../playersData";
 import EditGroupModal from "../components/EditGroupModal";
 import type { TGroup } from "../types";
-import groups from "../groups";
+import groups from "../constants/groups";
 import { sortBy } from "lodash-es";
+import { players } from "../constants/players";
 
 export default function GroupsPage() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -149,7 +149,7 @@ export default function GroupsPage() {
           open={open}
           currentMembers={selectedGroup.members}
           groupName={selectedGroup.name}
-          availableMembers={playersData}
+          availableMembers={players}
           onSave={() => {}}
         />
       )}

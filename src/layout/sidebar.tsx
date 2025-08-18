@@ -1,4 +1,3 @@
-"use client";
 import { useState } from "react";
 import {
   Box,
@@ -14,9 +13,19 @@ import {
   AppBar,
   useTheme,
   useMediaQuery,
+  Button,
 } from "@mui/material";
-import { Home, People, Group, Schedule, Menu } from "@mui/icons-material";
+import {
+  Home,
+  People,
+  Group,
+  Schedule,
+  Menu,
+  Logout,
+} from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router";
+import { getAuth, signOut } from "firebase/auth";
+import { app } from "../../firebase";
 
 const drawerWidth = 240;
 
@@ -24,7 +33,7 @@ const menuItems = [
   { text: "Početna", icon: <Home />, path: "/" },
   { text: "Igrači", icon: <People />, path: "/players" },
   { text: "Grupe", icon: <Group />, path: "/groups" },
-  { text: "Raspored", icon: <Schedule />, path: "/schedule" },
+  { text: "Raspored", icon: <Schedule />, path: "/matches" },
 ];
 
 export function Sidebar() {
@@ -82,6 +91,16 @@ export function Sidebar() {
           ))}
         </List>
       </Box>
+      <Button
+        sx={{
+          marginTop: "auto",
+        }}
+        variant="text"
+        onClick={() => signOut(getAuth(app))}
+        startIcon={<Logout />}
+      >
+        Odjava
+      </Button>
     </>
   );
 

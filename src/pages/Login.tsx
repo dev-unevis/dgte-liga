@@ -1,5 +1,3 @@
-"use client";
-
 import { Email, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Alert,
@@ -132,7 +130,7 @@ export default function Login() {
               <Box sx={{ textAlign: "center", mt: 2 }}>
                 <Typography variant="body2" color="text.secondary">
                   Nemaš korisnički račun?{" "}
-                  <Link href="#" color="primary">
+                  <Link href="/register" color="primary">
                     Registriraj se
                   </Link>
                 </Typography>

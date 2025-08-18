@@ -25,12 +25,12 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { playersData } from "../playersData";
+import { players } from "../constants/players";
 
 export default function Players() {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredPlayers = playersData.filter(
+  const filteredPlayers = players.filter(
     (player) =>
       `${player.firstName} ${player.lastName}`
         .toLowerCase()

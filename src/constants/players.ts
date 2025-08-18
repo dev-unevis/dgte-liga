@@ -1,4 +1,4 @@
-export const playersData = [
+export const players = [
   {
     id: 1,
     firstName: "Ivan",

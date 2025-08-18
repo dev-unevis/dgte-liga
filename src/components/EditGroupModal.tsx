@@ -99,7 +99,7 @@ export default function EditGroupModal({
                 `${option.firstName} ${option.lastName}`
               }
               value={selectedMembers}
-              onChange={(_, newValue) => setSelectedMembers(newValue)}
+              onChange={(_, newValue) => setSelectedMembers(newValue as Member[])}
               renderInput={(params) => (
                 <TextField
                   {...params}
