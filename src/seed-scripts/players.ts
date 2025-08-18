@@ -1,6 +1,5 @@
 export const players = [
   {
-    id: "1",
     firstName: "Ivan",
     lastName: "Horvat",
     phone: "+385 91 123 4567",
@@ -9,7 +8,6 @@ export const players = [
     password: "password1",
   },
   {
-    id: "2",
     firstName: "Ana",
     lastName: "Kovačić",
     phone: "+385 98 234 5678",
@@ -18,7 +16,6 @@ export const players = [
     password: "password2",
   },
   {
-    id: "3",
     firstName: "Petar",
     lastName: "Babić",
     phone: "+385 95 345 6789",
@@ -27,7 +24,6 @@ export const players = [
     password: "password3",
   },
   {
-    id: "4",
     firstName: "Marija",
     lastName: "Marić",
     phone: "+385 92 456 7890",
@@ -36,7 +32,6 @@ export const players = [
     password: "password4",
   },
   {
-    id: "5",
     firstName: "Luka",
     lastName: "Novak",
     phone: "+385 97 567 8901",
@@ -45,7 +40,6 @@ export const players = [
     password: "password5",
   },
   {
-    id: "6",
     firstName: "Ivana",
     lastName: "Jurić",
     phone: "+385 99 678 9012",
@@ -54,7 +48,6 @@ export const players = [
     password: "password6",
   },
   {
-    id: "7",
     firstName: "Tomislav",
     lastName: "Šarić",
     phone: "+385 91 789 0123",
@@ -63,7 +56,6 @@ export const players = [
     password: "password7",
   },
   {
-    id: "8",
     firstName: "Katarina",
     lastName: "Božić",
     phone: "+385 98 890 1234",
@@ -72,7 +64,6 @@ export const players = [
     password: "password8",
   },
   {
-    id: "9",
     firstName: "Marko",
     lastName: "Knežević",
     phone: "+385 95 901 2345",
@@ -81,7 +72,6 @@ export const players = [
     password: "password9",
   },
   {
-    id: "10",
     firstName: "Martina",
     lastName: "Pavić",
     phone: "+385 92 012 3456",
@@ -90,7 +80,6 @@ export const players = [
     password: "password10",
   },
   {
-    id: "11",
     firstName: "Josip",
     lastName: "Grgić",
     phone: "+385 97 111 2233",
@@ -99,7 +88,6 @@ export const players = [
     password: "password11",
   },
   {
-    id: "12",
     firstName: "Maja",
     lastName: "Filipović",
     phone: "+385 99 222 3344",
@@ -108,7 +96,6 @@ export const players = [
     password: "password12",
   },
   {
-    id: "13",
     firstName: "Stjepan",
     lastName: "Perić",
     phone: "+385 91 333 4455",
@@ -117,7 +104,6 @@ export const players = [
     password: "password13",
   },
   {
-    id: "14",
     firstName: "Lucija",
     lastName: "Radić",
     phone: "+385 98 444 5566",
@@ -126,7 +112,6 @@ export const players = [
     password: "password14",
   },
   {
-    id: "15",
     firstName: "Dario",
     lastName: "Tomić",
     phone: "+385 95 555 6677",
@@ -135,7 +120,6 @@ export const players = [
     password: "password15",
   },
   {
-    id: "16",
     firstName: "Sara",
     lastName: "Lovrić",
     phone: "+385 92 666 7788",
@@ -144,7 +128,6 @@ export const players = [
     password: "password16",
   },
   {
-    id: "17",
     firstName: "Krešimir",
     lastName: "Živković",
     phone: "+385 97 777 8899",
@@ -153,7 +136,6 @@ export const players = [
     password: "password17",
   },
   {
-    id: "18",
     firstName: "Tena",
     lastName: "Matić",
     phone: "+385 99 888 9900",
@@ -162,7 +144,6 @@ export const players = [
     password: "password18",
   },
   {
-    id: "19",
     firstName: "Ante",
     lastName: "Petrić",
     phone: "+385 91 101 2020",
@@ -171,7 +152,6 @@ export const players = [
     password: "password19",
   },
   {
-    id: "20",
     firstName: "Lea",
     lastName: "Vidović",
     phone: "+385 98 202 3030",
@@ -180,7 +160,6 @@ export const players = [
     password: "password20",
   },
   {
-    id: "21",
     firstName: "Filip",
     lastName: "Jakovljević",
     phone: "+385 95 303 4040",
@@ -189,7 +168,6 @@ export const players = [
     password: "password21",
   },
   {
-    id: "22",
     firstName: "Helena",
     lastName: "Rukavina",
     phone: "+385 92 404 5050",
@@ -198,7 +176,6 @@ export const players = [
     password: "password22",
   },
   {
-    id: "23",
     firstName: "Zvonimir",
     lastName: "Ljubić",
     phone: "+385 97 505 6060",
@@ -207,7 +184,6 @@ export const players = [
     password: "password23",
   },
   {
-    id: "24",
     firstName: "Iva",
     lastName: "Pranjić",
     phone: "+385 99 606 7070",
@@ -216,7 +192,6 @@ export const players = [
     password: "password24",
   },
   {
-    id: "25",
     firstName: "Mario",
     lastName: "Vuković",
     phone: "+385 91 707 8080",
@@ -225,7 +200,6 @@ export const players = [
     password: "password25",
   },
   {
-    id: "26",
     firstName: "Diana",
     lastName: "Miljković",
     phone: "+385 98 808 9090",
@@ -234,7 +208,6 @@ export const players = [
     password: "password26",
   },
   {
-    id: "27",
     firstName: "Hrvoje",
     lastName: "Barišić",
     phone: "+385 95 909 1010",
@@ -243,7 +216,6 @@ export const players = [
     password: "password27",
   },
   {
-    id: "28",
     firstName: "Nina",
     lastName: "Krpan",
     phone: "+385 92 010 1111",
@@ -252,7 +224,6 @@ export const players = [
     password: "password28",
   },
   {
-    id: "29",
     firstName: "Domagoj",
     lastName: "Glavaš",
     phone: "+385 97 111 1212",
@@ -261,7 +232,6 @@ export const players = [
     password: "password29",
   },
   {
-    id: "30",
     firstName: "Paula",
     lastName: "Klarić",
     phone: "+385 99 212 1313",
@@ -270,7 +240,6 @@ export const players = [
     password: "password30",
   },
   {
-    id: "31",
     firstName: "Matej",
     lastName: "Obradović",
     phone: "+385 91 313 1414",
@@ -279,7 +248,6 @@ export const players = [
     password: "password31",
   },
   {
-    id: "32",
     firstName: "Ema",
     lastName: "Čović",
     phone: "+385 98 414 1515",

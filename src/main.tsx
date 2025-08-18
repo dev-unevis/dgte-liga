@@ -13,6 +13,7 @@ import { WithAuth } from "./components/WithAuth.tsx";
 import Redirect from "./layout/redirect.tsx";
 import Register from "./pages/Register.tsx";
 import Matches from "./pages/Matches.tsx";
+import ProfilePage from "./pages/ProfilePage.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -29,10 +30,11 @@ createRoot(document.getElementById("root")!).render(
             <Route path="players" element={<Players />} />
             <Route path="groups" element={<Groups />} />
             <Route path="matches" element={<Matches />} />
+            <Route path="profile" element={<ProfilePage />} />
           </Routes>
         </Layout>
         <Redirect />
       </ThemeProvider>
     </BrowserRouter>
-  </StrictMode>
+  </StrictMode>,
 );

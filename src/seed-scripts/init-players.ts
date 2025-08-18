@@ -1,0 +1,28 @@
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { players } from "./players";
+import { app } from "../../firebase.js";
+import { addDoc, collection, getFirestore } from "firebase/firestore";
+
+export const createUsers = async () => {
+  const db = getFirestore(app);
+
+  for (const player of players) {
+    try {
+      const auth = await createUserWithEmailAndPassword(
+        getAuth(app),
+        player.email,
+        player.password
+      );
+
+      if (auth.user) {
+        const users = collection(db, "users");
+        delete player["password"];
+        await addDoc(users, {
+          ...player,
+        });
+      }
+    } catch {
+      //
+    }
+  }
+};

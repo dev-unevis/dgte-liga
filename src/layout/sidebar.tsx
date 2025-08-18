@@ -1,7 +1,19 @@
-import { useState } from "react";
 import {
+  AccountCircle,
+  Group,
+  Home,
+  Logout,
+  Menu,
+  People,
+  Person,
+  Schedule,
+} from "@mui/icons-material";
+import {
+  AppBar,
   Box,
+  Button,
   Drawer,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
@@ -9,31 +21,22 @@ import {
   ListItemText,
   Toolbar,
   Typography,
-  IconButton,
-  AppBar,
-  useTheme,
   useMediaQuery,
-  Button,
+  useTheme,
 } from "@mui/material";
-import {
-  Home,
-  People,
-  Group,
-  Schedule,
-  Menu,
-  Logout,
-} from "@mui/icons-material";
-import { useLocation, useNavigate } from "react-router";
 import { getAuth, signOut } from "firebase/auth";
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 import { app } from "../../firebase";
 
 const drawerWidth = 240;
 
 const menuItems = [
   { text: "Početna", icon: <Home />, path: "/" },
-  { text: "Igrači", icon: <People />, path: "/players" },
+  { text: "Igrači", icon: <Person />, path: "/players" },
   { text: "Grupe", icon: <Group />, path: "/groups" },
   { text: "Raspored", icon: <Schedule />, path: "/matches" },
+  { text: "Profil", icon: <AccountCircle />, path: "/profile" },
 ];
 
 export function Sidebar() {
@@ -92,10 +95,10 @@ export function Sidebar() {
         </List>
       </Box>
       <Button
+        variant="text"
         sx={{
           marginTop: "auto",
         }}
-        variant="text"
         onClick={() => signOut(getAuth(app))}
         startIcon={<Logout />}
       >
