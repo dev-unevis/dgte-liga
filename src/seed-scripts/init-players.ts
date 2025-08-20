@@ -7,10 +7,16 @@ export const createUsers = async () => {
   const db = getFirestore(app);
 
   for (const player of players) {
+    const defaultEmail =
+      player.firstName +
+      player.lastName +
+      "@" +
+      player.firstName +
+      player.lastName;
     try {
       const auth = await createUserWithEmailAndPassword(
         getAuth(app),
-        player.email,
+        defaultEmail,
         player.password
       );
 

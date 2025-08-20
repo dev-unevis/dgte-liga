@@ -32,7 +32,6 @@ import { app } from "../../firebase";
 const drawerWidth = 240;
 
 const menuItems = [
-  { text: "Početna", icon: <Home />, path: "/" },
   { text: "Igrači", icon: <Person />, path: "/players" },
   { text: "Grupe", icon: <Group />, path: "/groups" },
   { text: "Raspored", icon: <Schedule />, path: "/matches" },

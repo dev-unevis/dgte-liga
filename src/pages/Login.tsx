@@ -1,4 +1,4 @@
-import { Email, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
+import { Lock, Person, Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Alert,
   Box,
@@ -18,19 +18,23 @@ import { useState } from "react";
 import { app } from "../../firebase";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
+      // We are just trying to have some way of user management, meaning that each user
+      // has it's profile but is not bothered with the whole registration flow
+      const email = username + '@' + username
       await signInWithEmailAndPassword(getAuth(app), email, password);
     } catch (error) {
       console.log(error);
+      setError("Korisničko ime ili lozinka su netočni, molim vas pokušajte opet.")
     } finally {
       setLoading(false);
     }
@@ -65,17 +69,17 @@ export default function Login() {
                 margin="normal"
                 required
                 fullWidth
-                id="email"
-                label="Email"
-                name="email"
-                autoComplete="email"
+                id="username"
+                label="Korisničko ime"
+                name="username"
+                autoComplete="username"
                 autoFocus
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Email color="action" />
+                      <Person color="action" />
                     </InputAdornment>
                   ),
                 }}
@@ -111,12 +115,6 @@ export default function Login() {
                 }}
               />
 
-              <Box sx={{ textAlign: "right", mt: 1, mb: 2 }}>
-                <Link href="#" variant="body2" color="primary">
-                  Zaboravili ste lozinku?
-                </Link>
-              </Box>
-
               <Button
                 type="submit"
                 fullWidth
@@ -127,14 +125,14 @@ export default function Login() {
                 {loading ? "Prijava u tijeku..." : "Prijavi se"}
               </Button>
 
-              <Box sx={{ textAlign: "center", mt: 2 }}>
+              {/* <Box sx={{ textAlign: "center", mt: 2 }}>
                 <Typography variant="body2" color="text.secondary">
                   Nemaš korisnički račun?{" "}
                   <Link href="/register" color="primary">
                     Registriraj se
                   </Link>
                 </Typography>
-              </Box>
+              </Box> */}
             </Box>
           </CardContent>
         </Card>

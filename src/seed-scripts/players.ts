@@ -255,4 +255,13 @@ export const players = [
     dateOfBirth: "1997-07-13",
     password: "password32",
   },
+  {
+    id: "33",
+    firstName: "Danijel",
+    lastName: "Jakovac",
+    phone: "+385 95 353 3072",
+    email: "danijel.jakovac@email.com",
+    dateOfBirth: "2001-03-17",
+    password: "danijeljakovac123",
+  },
 ];
