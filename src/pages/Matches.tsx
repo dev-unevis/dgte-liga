@@ -54,7 +54,7 @@ export default function Matches() {
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
   const auth = getAuth();
-  const [showOnlyMine, setShowOnlyMine] = useState(false);
+  const [showOnlyMine, setShowOnlyMine] = useState(true);
 
   const getGroupMatches = async () => {
     let items: TMatch[] = [];

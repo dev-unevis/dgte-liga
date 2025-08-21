@@ -44,7 +44,7 @@ export default function GroupsPage() {
     "#7b1fa2", // secondary.dark (deep purple)
   ];
   const auth = getAuth();
-  const [showOnlyMine, setShowOnlyMine] = useState(false);
+  const [showOnlyMine, setShowOnlyMine] = useState(true);
 
   const initialize = async () => {
     let items: TMatch[] = [];
