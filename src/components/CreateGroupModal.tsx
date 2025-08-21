@@ -22,7 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import type { CreateGroupModalProps, Member } from "../types";
+import type { CreateGroupModalProps, TUser } from "../types";
 
 export default function CreateGroupModal({
   open,
@@ -31,8 +31,8 @@ export default function CreateGroupModal({
   onSave,
 }: CreateGroupModalProps) {
   const [groupName, setGroupName] = useState("");
-  const [members, setMembers] = useState<Member[]>([]);
-  const [selectedMembers, setSelectedMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<TUser[]>([]);
+  const [selectedMembers, setSelectedMembers] = useState<TUser[]>([]);
 
   const handleAddMembers = () => {
     const newMembers = selectedMembers.filter(
@@ -117,7 +117,7 @@ export default function CreateGroupModal({
               }
               value={selectedMembers}
               onChange={(_, newValue) =>
-                setSelectedMembers(newValue as Member[])
+                setSelectedMembers(newValue as TUser[])
               }
               renderInput={(params) => (
                 <TextField

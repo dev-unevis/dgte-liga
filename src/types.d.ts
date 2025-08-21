@@ -9,10 +9,6 @@ export type TUser = {
   phone: string;
 };
 
-export type Member = TUser & {
-  groupRanking: number;
-};
-
 export interface EditGroupModalProps {
   open: boolean;
   onClose: () => void;
@@ -33,11 +29,12 @@ export type TGroup = {
   id?: string;
   name: string;
   memberIds: string[];
-  members: Array<{
-    id: string;
-    groupRanking: number;
-    pointsInGroup: number;
-  }>;
+  members: Array<
+    {
+      id: string;
+      pointsInGroup?: number;
+    } & TUser
+  >;
   createdAt: Timestamp;
   color: string;
 };

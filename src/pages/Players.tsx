@@ -1,6 +1,6 @@
 "use client";
 
-import { Email, Person, Phone, Search } from "@mui/icons-material";
+import { Person, Phone, Search } from "@mui/icons-material";
 import {
   Avatar,
   Box,
@@ -82,53 +82,71 @@ export default function Players() {
               <TableCell sx={{ color: "white", fontWeight: 600 }}>
                 Telefon
               </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: 600 }}>
+              {/* <TableCell sx={{ color: "white", fontWeight: 600 }}>
                 Email
-              </TableCell>
+              </TableCell> */}
               {/* <TableCell sx={{ color: "white", fontWeight: 600 }}>
                 Akcije
               </TableCell> */}
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredPlayers.map((player) => (
-              <TableRow
-                key={player.id}
-                sx={{
-                  "&:hover": { backgroundColor: "action.hover" },
-                  "&:nth-of-type(odd)": { backgroundColor: "action.selected" },
-                }}
-              >
-                <TableCell>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <Avatar
-                      sx={{ bgcolor: "primary.main", width: 40, height: 40 }}
-                      className="text-sm!"
-                    >
-                      {player.firstName[0]}
-                      {player.lastName[0]}
-                    </Avatar>
-                  </Box>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 500 }}>
-                  {player.firstName}
-                </TableCell>
-                <TableCell sx={{ fontWeight: 500 }}>
-                  {player.lastName}
-                </TableCell>
-                <TableCell>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Phone fontSize="small" color="action" />
-                    {player.phone}
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Email fontSize="small" color="action" />
-                    {player.email}
-                  </Box>
-                </TableCell>
-                {/* <TableCell>
+            {filteredPlayers.map((player) => {
+              // const defaultEmail =
+              //   player.firstName.toLowerCase() +
+              //   "." +
+              //   player.lastName.toLowerCase() +
+              //   "@" +
+              //   player.firstName.toLowerCase() +
+              //   "." +
+              //   player.lastName.toLowerCase();
+              // const isDefaultEmail = defaultEmail === player.email;
+              return (
+                <TableRow
+                  key={player.id}
+                  sx={{
+                    "&:hover": { backgroundColor: "action.hover" },
+                    "&:nth-of-type(odd)": {
+                      backgroundColor: "action.selected",
+                    },
+                  }}
+                >
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Avatar
+                        sx={{ bgcolor: "primary.main", width: 40, height: 40 }}
+                        className="text-sm!"
+                      >
+                        {player.firstName[0]}
+                        {player.lastName[0]}
+                      </Avatar>
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 500 }}>
+                    {player.firstName}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 500 }}>
+                    {player.lastName}
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Phone fontSize="small" color="action" />
+                      {player.phone}
+                    </Box>
+                  </TableCell>
+                  {/* <TableCell>
+                    {!isDefaultEmail ? (
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Email fontSize="small" color="action" />
+                        {player.email}
+                      </Box>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell> */}
+                  {/* <TableCell>
                   <Box sx={{ display: "flex", gap: 1 }}>
                     <IconButton size="small" color="primary">
                       <Edit fontSize="small" />
@@ -138,8 +156,9 @@ export default function Players() {
                     </IconButton>
                   </Box>
                 </TableCell> */}
-              </TableRow>
-            ))}
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>

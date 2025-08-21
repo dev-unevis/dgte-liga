@@ -37,6 +37,8 @@ import { useUsers } from "../providers/UsersProvider";
 import type { TGroup, TMatch } from "../types";
 import { updateItem } from "../utils/updateItem";
 import type { Timestamp } from "firebase/firestore";
+import { sortBy } from "lodash-es";
+import { getAuth } from "firebase/auth";
 
 export default function Matches() {
   const [selectedMatch, setSelectedMatch] = useState<TMatch | null>(null);
@@ -51,21 +53,30 @@ export default function Matches() {
   const [modalOpen, setModalOpen] = useState(false);
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
+  const auth = getAuth();
+  const [showOnlyMine, setShowOnlyMine] = useState(false);
 
   const getGroupMatches = async () => {
     let items: TMatch[] = [];
 
-    for (const group of groups) {
+    for (const group of sortBy(groups, "name")) {
       const groupMatches = await getData<TMatch>(`groups/${group.id}/matches`);
       items = items.concat(groupMatches);
     }
 
-    setMatches(items);
+    const uid = auth.currentUser?.uid;
+    setMatches(
+      showOnlyMine
+        ? items.filter((t) =>
+            [t.playerOneId, t.playerTwoId].includes(uid as string)
+          )
+        : items
+    );
   };
 
   useEffect(() => {
     getGroupMatches();
-  }, [groups]);
+  }, [groups, auth.currentUser, showOnlyMine]);
 
   const getPlayer = (id: string) => {
     const player = players.find((p) => p.id.toString() === id);
@@ -233,6 +244,15 @@ export default function Matches() {
           Raspored
         </Typography>
       </div>
+      <Button
+        sx={{
+          mb: 2,
+        }}
+        variant="contained"
+        onClick={() => setShowOnlyMine((oldState) => !oldState)}
+      >
+        {showOnlyMine ? "Prikaži sve mečeve" : "Prikaži samo moje mečeve"}
+      </Button>
       <TableContainer component={Paper} variant="outlined">
         <Table>
           <TableHead>

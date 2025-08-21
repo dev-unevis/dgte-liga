@@ -1,10 +1,8 @@
 import {
   AccountCircle,
   Group,
-  Home,
   Logout,
   Menu,
-  People,
   Person,
   Schedule,
 } from "@mui/icons-material";

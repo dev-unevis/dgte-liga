@@ -4,18 +4,21 @@ import useCollection from "../hooks/useCollection";
 
 interface TUsersContext {
   users: TUser[];
+  refresh: () => Promise<void>;
 }
 
 const UsersContext = createContext<TUsersContext | null>(null);
 
-const useUsers = () => useContext(UsersContext) || { users: [] };
+const useUsers = () =>
+  useContext(UsersContext) || { users: [], refresh: () => {} };
 
 const UsersProvider = ({ children }: { children: ReactNode }) => {
-  const { data } = useCollection<TUser>("users");
+  const { data, refresh } = useCollection<TUser>("users");
   return (
     <UsersContext.Provider
       value={{
         users: data,
+        refresh: refresh,
       }}
     >
       {children}

@@ -1,15 +1,6 @@
-import {
-  Create,
-  Delete,
-  Edit,
-  Group,
-  MoreVert,
-  Person,
-  Schedule,
-} from "@mui/icons-material";
+import { Delete, Edit, Group, MoreVert, Person } from "@mui/icons-material";
 import {
   Avatar,
-  Box,
   Button,
   Card,
   CardContent,
@@ -22,18 +13,16 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import dayjs from "dayjs";
+import { getAuth } from "firebase/auth";
 import { serverTimestamp } from "firebase/firestore";
-import { flatMap, sortBy } from "lodash-es";
+import { flatMap, reverse, sortBy } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import CreateGroupModal from "../components/CreateGroupModal";
 import EditGroupModal from "../components/EditGroupModal";
-import useCollection from "../hooks/useCollection";
+import useCollection, { getData } from "../hooks/useCollection";
 import { useUsers } from "../providers/UsersProvider";
-import type { Member, TGroup } from "../types";
+import type { TGroup, TMatch, TUser } from "../types";
 import { addCollectionItem } from "../utils/addCollectionItem";
-import { generateSchedule } from "../utils/generateSchedule";
 import { updateItem } from "../utils/updateItem";
 
 export default function GroupsPage() {
@@ -54,20 +43,43 @@ export default function GroupsPage() {
     "#1565c0", // primary.dark (deep blue)
     "#7b1fa2", // secondary.dark (deep purple)
   ];
+  const auth = getAuth();
+  const [showOnlyMine, setShowOnlyMine] = useState(false);
+
+  const initialize = async () => {
+    let items: TMatch[] = [];
+
+    for (const group of data) {
+      const matches = await getData<TMatch>(`groups/${group.id}/matches`);
+      items = items.concat(...matches);
+    }
+
+    const mappedGroups = data.map((group) => {
+      return {
+        ...group,
+        members: group.members.map((member) => {
+          const player = players.find((p) => p.id === member.id);
+          return {
+            ...member,
+            ...player,
+            pointsInGroup:
+              items.filter((match) => match.winnerId === player?.id).length * 3,
+          };
+        }),
+      };
+    });
+    setGroups(
+      showOnlyMine
+        ? mappedGroups.filter((g) =>
+            g.memberIds.includes(auth.currentUser?.uid as string)
+          )
+        : mappedGroups
+    );
+  };
 
   useEffect(() => {
-    setGroups(
-      data.map((t) => {
-        return {
-          ...t,
-          members: t.members.map((t) => ({
-            ...t,
-            ...players.find((p) => p.id === t.id),
-          })),
-        };
-      })
-    );
-  }, [data, players]);
+    initialize();
+  }, [data, players, showOnlyMine]);
 
   const availableMembers = useMemo(() => {
     const members = flatMap(groups.map((t) => t.members));
@@ -90,14 +102,12 @@ export default function GroupsPage() {
     setSelectedGroup(null);
   };
 
-  const onGroupCreate = async (groupName: string, members: Member[]) => {
+  const onGroupCreate = async (groupName: string, members: TUser[]) => {
     const memberIds = members.map((t) => t.id);
     await addCollectionItem<TGroup>("groups", {
       name: groupName,
-      members: memberIds.map((id, index) => ({
+      members: memberIds.map((id) => ({
         id,
-        groupRanking: index + 1,
-        pointsInGroup: 0,
       })),
       color: colors[groups.length ? groups.length - 1 : 0],
       memberIds,
@@ -106,15 +116,13 @@ export default function GroupsPage() {
     await refresh();
   };
 
-  const onGroupEdit = async (groupName: string, members: Member[]) => {
+  const onGroupEdit = async (groupName: string, members: TUser[]) => {
     if (!selectedGroup?.id) return;
     const memberIds = members.map((t) => t.id);
     await updateItem<TGroup>("groups", selectedGroup?.id, {
       name: groupName,
-      members: memberIds.map((id, index) => ({
+      members: memberIds.map((id) => ({
         id,
-        groupRanking: index + 1,
-        pointsInGroup: 0,
       })),
       memberIds,
       createdAt: serverTimestamp(),
@@ -122,13 +130,12 @@ export default function GroupsPage() {
     await refresh();
   };
 
-  const createSchedule = async () => {
-    const matches = await generateSchedule();
-
-    for (const match of matches) {
-      await addCollectionItem(`groups/${match.groupId}/matches`, match);
-    }
-  };
+  // const createSchedule = async () => {
+  //   const matches = await generateSchedule();
+  //   for (const match of matches) {
+  //     await addCollectionItem(`groups/${match.groupId}/matches`, match);
+  //   }
+  // };
 
   return (
     <>
@@ -143,16 +150,24 @@ export default function GroupsPage() {
             Grupe
           </Typography>
         </div>
-
+        {/* 
         <Box sx={{ mb: 2 }}>
           <DatePicker
             defaultValue={dayjs()}
             label={"Odaberi mjesec"}
             views={["month", "year"]}
           />
-        </Box>
-
-        <Box sx={{ mb: 2 }}>
+        </Box> */}
+        <Button
+          sx={{
+            mb: 2,
+          }}
+          variant="contained"
+          onClick={() => setShowOnlyMine((oldState) => !oldState)}
+        >
+          {showOnlyMine ? "Prikaži sve grupe" : "Prikaži samo moju grupu"}
+        </Button>
+        {/* <Box sx={{ mb: 2 }}>
           <Button
             variant="contained"
             onClick={() => setCreateGroup(true)}
@@ -168,7 +183,7 @@ export default function GroupsPage() {
           >
             Generiraj raspored
           </Button>
-        </Box>
+        </Box> */}
         <div className="flex flex-wrap gap-4">
           {sortBy(groups, "name").map((group) => (
             <Card
@@ -213,35 +228,35 @@ export default function GroupsPage() {
                       Članovi grupe:
                     </Typography>
                     <div className="flex flex-col gap-2">
-                      {sortBy(group.members, "groupRanking").map((member) => (
-                        <div
-                          key={member.id}
-                          className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
-                        >
-                          <p className="mx-2 font-semibold">
-                            {member.groupRanking}.
-                          </p>
-                          <Avatar className="w-8 h-8 text-sm bg-blue-500">
-                            {member.avatar}
-                          </Avatar>
-                          <div className="min-w-0 flex-1 flex justify-between mx-2">
-                            <Typography
-                              variant="body2"
-                              className="font-medium text-gray-800 truncate"
-                            >
-                              {member.firstName}
-                              &nbsp;
-                              {member.lastName}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              className="font-medium text-gray-800 truncate"
-                            >
-                              {member.pointsInGroup}
-                            </Typography>
+                      {reverse(sortBy(group.members, "pointsInGroup")).map(
+                        (member, index) => (
+                          <div
+                            key={member.id}
+                            className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                          >
+                            <p className="mx-2 font-semibold">{index + 1}.</p>
+                            <Avatar className="w-8 h-8 text-sm bg-blue-500">
+                              {member.avatar}
+                            </Avatar>
+                            <div className="min-w-0 flex-1 flex justify-between mx-2">
+                              <Typography
+                                variant="body2"
+                                className="font-medium text-gray-800 truncate"
+                              >
+                                {member.firstName}
+                                &nbsp;
+                                {member.lastName}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                className="font-medium text-gray-800 truncate"
+                              >
+                                {member.pointsInGroup}
+                              </Typography>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      )}
                     </div>
                   </div>
                 )}

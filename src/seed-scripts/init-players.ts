@@ -1,30 +1,26 @@
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-import { players } from "./players";
+import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { app } from "../../firebase.js";
-import { addDoc, collection, getFirestore } from "firebase/firestore";
+import { players } from "./players";
 
 export const createUsers = async () => {
   const db = getFirestore(app);
 
   for (const player of players) {
-    const defaultEmail =
-      player.firstName +
-      player.lastName +
-      "@" +
-      player.firstName +
-      player.lastName;
     try {
       const auth = await createUserWithEmailAndPassword(
         getAuth(app),
-        defaultEmail,
+        player.email,
         player.password
       );
 
       if (auth.user) {
-        const users = collection(db, "users");
-        delete player["password"];
-        await addDoc(users, {
-          ...player,
+        const user = doc(db, "users", auth.user.uid);
+        await setDoc(user, {
+          firstName: player.firstName,
+          lastName: player.lastName,
+          phone: player.phone,
+          email: player.email,
         });
       }
     } catch {

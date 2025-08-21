@@ -8,7 +8,6 @@ import {
   Container,
   IconButton,
   InputAdornment,
-  Link,
   TextField,
   Typography,
 } from "@mui/material";
@@ -30,11 +29,13 @@ export default function Login() {
       setLoading(true);
       // We are just trying to have some way of user management, meaning that each user
       // has it's profile but is not bothered with the whole registration flow
-      const email = username + '@' + username
+      const email = username + "@" + username;
       await signInWithEmailAndPassword(getAuth(app), email, password);
     } catch (error) {
       console.log(error);
-      setError("Korisničko ime ili lozinka su netočni, molim vas pokušajte opet.")
+      setError(
+        "Korisničko ime ili lozinka su netočni, molim vas pokušajte opet."
+      );
     } finally {
       setLoading(false);
     }

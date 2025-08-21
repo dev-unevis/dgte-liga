@@ -22,7 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import type { EditGroupModalProps, Member } from "../types";
+import type { EditGroupModalProps, TUser } from "../types";
 
 export default function EditGroupModal({
   open,
@@ -33,8 +33,8 @@ export default function EditGroupModal({
   onSave,
 }: EditGroupModalProps) {
   const [groupName, setGroupName] = useState(name);
-  const [members, setMembers] = useState<Member[]>(currentMembers);
-  const [selectedMembers, setSelectedMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<TUser[]>(currentMembers);
+  const [selectedMembers, setSelectedMembers] = useState<TUser[]>([]);
 
   const handleAddMembers = () => {
     const newMembers = selectedMembers.filter(
@@ -118,7 +118,7 @@ export default function EditGroupModal({
               }
               value={selectedMembers}
               onChange={(_, newValue) =>
-                setSelectedMembers(newValue as Member[])
+                setSelectedMembers(newValue as TUser[])
               }
               renderInput={(params) => (
                 <TextField
@@ -196,6 +196,7 @@ export default function EditGroupModal({
                       onClick={() => handleRemoveMember(member.id)}
                       color="error"
                       size="small"
+                      disabled={true}
                     >
                       <DeleteIcon />
                     </IconButton>
