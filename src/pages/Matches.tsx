@@ -596,7 +596,7 @@ export default function Matches() {
                         fullWidth
                         type="number"
                         label={`${playerOne?.firstName} - gemovi`}
-                        value={set.playerOneGames}
+                        value={set.playerOneGames || null}
                         onChange={(e) =>
                           handleSetScoreChange(
                             index,
@@ -629,7 +629,7 @@ export default function Matches() {
                         fullWidth
                         type="number"
                         label={`${playerTwo?.firstName} - gemovi`}
-                        value={set.playerTwoGames}
+                        value={set.playerTwoGames || null}
                         onChange={(e) =>
                           handleSetScoreChange(
                             index,

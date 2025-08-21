@@ -8,7 +8,8 @@ export default function Redirect() {
   const location = useLocation();
   const redirectToLogin = () => {
     if (
-      !auth.currentUser && !location.pathname.includes("login") &&
+      !auth.currentUser &&
+      !location.pathname.includes("login") &&
       !location.pathname.includes("register")
     ) {
       navigate("/login");
@@ -17,7 +18,7 @@ export default function Redirect() {
 
   onAuthStateChanged(auth, (user) => {
     if (!user?.uid) return redirectToLogin();
-    if (location.pathname.includes("login")) navigate("/");
+    if (location.pathname.includes("login")) navigate("/players");
   });
 
   return <></>;
