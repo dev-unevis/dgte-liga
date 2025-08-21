@@ -256,7 +256,6 @@ export const players = [
     password: "password32",
   },
   {
-    id: "33",
     firstName: "Danijel",
     lastName: "Jakovac",
     phone: "+385 95 353 3072",

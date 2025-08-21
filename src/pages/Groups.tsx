@@ -5,6 +5,7 @@ import {
   Group,
   MoreVert,
   Person,
+  Schedule,
 } from "@mui/icons-material";
 import {
   Avatar,
@@ -32,7 +33,8 @@ import useCollection from "../hooks/useCollection";
 import { useUsers } from "../providers/UsersProvider";
 import type { Member, TGroup } from "../types";
 import { addCollectionItem } from "../utils/addCollectionItem";
-import { updateItem } from "../utils/updateDoc";
+import { generateSchedule } from "../utils/generateSchedule";
+import { updateItem } from "../utils/updateItem";
 
 export default function GroupsPage() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -42,6 +44,16 @@ export default function GroupsPage() {
   const { users: players } = useUsers();
   const { data, refresh } = useCollection<TGroup>("groups");
   const [groups, setGroups] = useState<TGroup[]>([]);
+  const colors = [
+    "#1976d2", // primary.main (blue)
+    "#9c27b0", // secondary.main (purple)
+    "#d32f2f", // error.main (red)
+    "#ed6c02", // warning.main (orange)
+    "#2e7d32", // success.main (green)
+    "#0288d1", // info.main (cyan/teal)
+    "#1565c0", // primary.dark (deep blue)
+    "#7b1fa2", // secondary.dark (deep purple)
+  ];
 
   useEffect(() => {
     setGroups(
@@ -87,6 +99,7 @@ export default function GroupsPage() {
         groupRanking: index + 1,
         pointsInGroup: 0,
       })),
+      color: colors[groups.length ? groups.length - 1 : 0],
       memberIds,
       createdAt: serverTimestamp(),
     } as TGroup);
@@ -107,6 +120,14 @@ export default function GroupsPage() {
       createdAt: serverTimestamp(),
     } as TGroup);
     await refresh();
+  };
+
+  const createSchedule = async () => {
+    const matches = await generateSchedule();
+
+    for (const match of matches) {
+      await addCollectionItem(`groups/${match.groupId}/matches`, match);
+    }
   };
 
   return (
@@ -139,6 +160,14 @@ export default function GroupsPage() {
           >
             Kreiraj grupu
           </Button>
+          <Button
+            variant="outlined"
+            sx={{ ml: 2 }}
+            onClick={() => createSchedule()}
+            startIcon={<Schedule />}
+          >
+            Generiraj raspored
+          </Button>
         </Box>
         <div className="flex flex-wrap gap-4">
           {sortBy(groups, "name").map((group) => (
@@ -155,6 +184,10 @@ export default function GroupsPage() {
                     <Chip
                       label={group.name}
                       variant="filled"
+                      sx={{
+                        backgroundColor: group.color,
+                        color: "white",
+                      }}
                       className="font-medium"
                     />
                     <Typography variant="body2" className="text-gray-500">

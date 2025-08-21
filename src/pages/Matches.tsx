@@ -31,29 +31,18 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { useState } from "react";
-import groups from "../constants/groups";
-import matches from "../constants/matches";
-
-type TMatch = {
-  id: string;
-  playerOneId: string;
-  playerTwoId: string;
-  sets: Array<{
-    setNumber: 1 | 2 | 3;
-    playerOneGames: number;
-    playerTwoGames: number;
-  }>;
-  winnerId: string;
-  scheduledAt: string;
-  status: string;
-};
+import { useEffect, useState } from "react";
+import useCollection, { getData } from "../hooks/useCollection";
+import { useUsers } from "../providers/UsersProvider";
+import type { TGroup, TMatch } from "../types";
+import { updateItem } from "../utils/updateItem";
+import type { Timestamp } from "firebase/firestore";
 
 export default function Matches() {
   const [selectedMatch, setSelectedMatch] = useState<TMatch | null>(null);
-  const [matchResults, setMatchResults] = useState<TMatch[]>(
-    matches as TMatch[]
-  );
+  const [matches, setMatches] = useState<TMatch[]>([]);
+  const { users: players } = useUsers();
+  const { data: groups, refresh } = useCollection<TGroup>("groups");
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -62,6 +51,21 @@ export default function Matches() {
   const [modalOpen, setModalOpen] = useState(false);
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
+
+  const getGroupMatches = async () => {
+    let items: TMatch[] = [];
+
+    for (const group of groups) {
+      const groupMatches = await getData<TMatch>(`groups/${group.id}/matches`);
+      items = items.concat(groupMatches);
+    }
+
+    setMatches(items);
+  };
+
+  useEffect(() => {
+    getGroupMatches();
+  }, [groups]);
 
   const getPlayer = (id: string) => {
     const player = players.find((p) => p.id.toString() === id);
@@ -136,22 +140,23 @@ export default function Matches() {
       return match.playerOneId;
     } else if (playerTwoSets > playerOneSets) {
       return match.playerTwoId;
+    } else {
+      return "";
     }
-
-    return match.winnerId;
   };
 
-  const saveMatchResults = () => {
-    if (!selectedMatch) return;
+  const saveMatchResults = async () => {
+    if (!selectedMatch || !selectedMatch.id) return;
 
     const winner = determineWinner(selectedMatch);
     const updatedMatch = { ...selectedMatch, winnerId: winner };
 
-    const updatedMatches = matchResults.map((match) =>
-      match.id === updatedMatch.id ? updatedMatch : match
-    );
+    updatedMatch.status = winner ? "Završen" : "Čeka";
 
-    setMatchResults(updatedMatches);
+    const path = `groups/${updatedMatch.groupId}/matches`;
+
+    await updateItem(path, selectedMatch.id, updatedMatch);
+    await refresh();
     setSnackbar({
       open: true,
       message: "Rezultati meča su uspješno spremljeni!",
@@ -171,14 +176,14 @@ export default function Matches() {
 
   const handleScheduledTimeChange = (newDateTime: string) => {
     if (!selectedMatch) return;
-    setSelectedMatch({ ...selectedMatch, scheduledAt: newDateTime });
+    setSelectedMatch({ ...selectedMatch, scheduledAt: new Date(newDateTime) });
   };
 
-  const formatScheduledTime = (scheduledAt: string) => {
+  const formatScheduledTime = (scheduledAt: Timestamp) => {
     if (!scheduledAt) return "-";
 
     try {
-      const date = new Date(scheduledAt);
+      const date = scheduledAt.toDate();
       if (isNaN(date.getTime())) return "-";
       return date.toLocaleString("hr-HR", {
         day: "2-digit",
@@ -193,11 +198,12 @@ export default function Matches() {
     }
   };
 
-  const formatDateTimeForInput = (scheduledAt: string) => {
+  const formatDateTimeForInput = (scheduledAt: Date | Timestamp | null) => {
     if (!scheduledAt) return "";
 
+    const date =
+      scheduledAt instanceof Date ? scheduledAt : scheduledAt.toDate();
     try {
-      const date = new Date(scheduledAt);
       if (isNaN(date.getTime())) return "";
       return date.toISOString().slice(0, 16);
     } catch (error) {
@@ -258,7 +264,7 @@ export default function Matches() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {matchResults.map((match) => {
+            {matches.map((match, index) => {
               const p1 = getPlayer(match.playerOneId);
               const p2 = getPlayer(match.playerTwoId);
               const p1Group = getPlayerGroup(match.playerOneId);
@@ -278,7 +284,7 @@ export default function Matches() {
                 >
                   <TableCell>
                     <Typography variant="body2" fontWeight="medium">
-                      {match.id}
+                      {index + 1}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -293,15 +299,26 @@ export default function Matches() {
                       >
                         {p1?.avatar}
                       </Avatar>
-                      <Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          gap: 2,
+                          width: "60%",
+                        }}
+                      >
                         <Typography variant="body2" fontWeight="medium">
                           {p1?.firstName} {p1?.lastName}
                         </Typography>
                         <Chip
                           label={p1Group?.name}
-                          size="small"
-                          color={p1Group?.color as any}
-                          sx={{ fontSize: "0.75rem", height: 20 }}
+                          variant="filled"
+                          sx={{
+                            backgroundColor: p1Group?.color,
+                            color: "white",
+                          }}
+                          className="font-medium"
                         />
                       </Box>
                     </Box>
@@ -318,15 +335,25 @@ export default function Matches() {
                       >
                         {p2?.avatar}
                       </Avatar>
-                      <Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: 2,
+                          width: "60%",
+                        }}
+                      >
                         <Typography variant="body2" fontWeight="medium">
                           {p2?.firstName} {p2?.lastName}
                         </Typography>
                         <Chip
                           label={p2Group?.name}
-                          size="small"
-                          color={p2Group?.color as any}
-                          sx={{ fontSize: "0.75rem", height: 20 }}
+                          variant="filled"
+                          sx={{
+                            backgroundColor: p2Group?.color,
+                            color: "white",
+                          }}
+                          className="font-medium"
                         />
                       </Box>
                     </Box>
@@ -343,7 +370,7 @@ export default function Matches() {
                   </TableCell>
                   <TableCell align="center">
                     <Typography variant="body2" fontSize="0.875rem">
-                      {formatScheduledTime(match.scheduledAt)}
+                      {formatScheduledTime(match.scheduledAt as Timestamp)}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
@@ -400,7 +427,6 @@ export default function Matches() {
             </IconButton>
           </Box>
         </DialogTitle>
-
         <DialogContent dividers sx={{ px: { xs: 2, sm: 3 } }}>
           {selectedMatch && (
             <>
@@ -526,7 +552,13 @@ export default function Matches() {
               </Typography>
 
               {selectedMatch.sets.map((set, index) => (
-                <Box key={index} mb={3}>
+                <Box
+                  key={index}
+                  mb={3}
+                  sx={{
+                    width: "100%",
+                  }}
+                >
                   <Typography
                     variant="subtitle1"
                     gutterBottom
@@ -534,12 +566,12 @@ export default function Matches() {
                   >
                     {index + 1}. set
                   </Typography>
-                  <Grid
-                    container
-                    spacing={{ xs: 1, sm: 2 }}
+                  <Box
+                    display="flex"
                     alignItems="center"
+                    justifyContent="space-between"
                   >
-                    <Grid>
+                    <Grid width="40%">
                       <TextField
                         fullWidth
                         type="number"
@@ -572,7 +604,7 @@ export default function Matches() {
                         -
                       </Typography>
                     </Grid>
-                    <Grid>
+                    <Grid width="40%">
                       <TextField
                         fullWidth
                         type="number"
@@ -597,7 +629,7 @@ export default function Matches() {
                         }}
                       />
                     </Grid>
-                  </Grid>
+                  </Box>
                 </Box>
               ))}
 
