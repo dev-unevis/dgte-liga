@@ -3,7 +3,6 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { connectAuthEmulator, getAuth } from "firebase/auth";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
-import { createUsers } from "./src/seed-scripts/init-players";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -26,4 +25,4 @@ export const analytics = getAnalytics(app);
 connectAuthEmulator(getAuth(app), "http://127.0.0.1:9099");
 connectFirestoreEmulator(getFirestore(app), "127.0.0.1", 8080);
 
-createUsers();
+// createUsers();

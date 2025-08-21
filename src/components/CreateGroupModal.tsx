@@ -22,18 +22,16 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import type { EditGroupModalProps, Member } from "../types";
+import type { CreateGroupModalProps, Member } from "../types";
 
-export default function EditGroupModal({
+export default function CreateGroupModal({
   open,
   onClose,
-  name,
-  currentMembers,
   availableMembers,
   onSave,
-}: EditGroupModalProps) {
-  const [groupName, setGroupName] = useState(name);
-  const [members, setMembers] = useState<Member[]>(currentMembers);
+}: CreateGroupModalProps) {
+  const [groupName, setGroupName] = useState("");
+  const [members, setMembers] = useState<Member[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<Member[]>([]);
 
   const handleAddMembers = () => {
@@ -55,13 +53,13 @@ export default function EditGroupModal({
     setMembers(members.filter((m) => m.id !== memberId));
   };
 
-  const handleSave = () => {
-    onSave(groupName, members);
+  const handleSave = async () => {
+    await onSave(groupName, members);
     onClose();
   };
 
   const handleCancel = () => {
-    setMembers(currentMembers); // Reset to original state
+    setMembers([]); // Reset to original state
     setSelectedMembers([]);
     onClose();
   };
@@ -78,7 +76,7 @@ export default function EditGroupModal({
     >
       <DialogTitle sx={{ pb: 1 }}>
         <Typography variant="h6" component="div">
-          Uredi Grupu - {groupName}
+          Kreiraj Grupu
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {members.length} članova
@@ -111,6 +109,7 @@ export default function EditGroupModal({
           <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
             <Autocomplete
               multiple
+              disableCloseOnSelect
               sx={{ flex: 1 }}
               options={filteredAvailableMembers}
               getOptionLabel={(option) =>

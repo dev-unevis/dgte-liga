@@ -1,8 +1,12 @@
+import type { Timestamp } from "firebase/firestore";
+
 export type TUser = {
   id: string;
   firstName: string;
   lastName: string;
   avatar: string;
+  email: string;
+  phone: string;
 };
 
 export type Member = TUser & {
@@ -12,15 +16,27 @@ export type Member = TUser & {
 export interface EditGroupModalProps {
   open: boolean;
   onClose: () => void;
-  groupName: string;
+  name: string;
   currentMembers: Member[];
   availableMembers: TUser[];
-  onSave: (members: Member[]) => void;
+  onSave: (groupName: string, members: Member[]) => Promise<void>;
+}
+
+export interface CreateGroupModalProps {
+  open: boolean;
+  onClose: () => void;
+  availableMembers: TUser[];
+  onSave: (groupName: string, members: Member[]) => Promise<void>;
 }
 
 export type TGroup = {
-  id: string;
+  id?: string;
   name: string;
-  color: string;
-  members: Member[];
+  memberIds: string[];
+  members: Array<{
+    id: string;
+    groupRanking: number;
+    pointsInGroup: number;
+  }>;
+  createdAt: Timestamp;
 };

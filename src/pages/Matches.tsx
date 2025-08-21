@@ -34,7 +34,6 @@ import {
 import { useState } from "react";
 import groups from "../constants/groups";
 import matches from "../constants/matches";
-import { players } from "../constants/players";
 
 type TMatch = {
   id: string;
@@ -53,7 +52,7 @@ type TMatch = {
 export default function Matches() {
   const [selectedMatch, setSelectedMatch] = useState<TMatch | null>(null);
   const [matchResults, setMatchResults] = useState<TMatch[]>(
-    matches as TMatch[],
+    matches as TMatch[]
   );
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -63,6 +62,7 @@ export default function Matches() {
   const [modalOpen, setModalOpen] = useState(false);
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
+
   const getPlayer = (id: string) => {
     const player = players.find((p) => p.id.toString() === id);
     return player;
@@ -80,8 +80,8 @@ export default function Matches() {
   };
 
   const calculateSetResult = (match: TMatch) => {
-    const hasResults = match.sets.some((set) =>
-      set.playerOneGames > 0 || set.playerTwoGames > 0
+    const hasResults = match.sets.some(
+      (set) => set.playerOneGames > 0 || set.playerTwoGames > 0
     );
     if (!hasResults) return "-";
 
@@ -107,7 +107,7 @@ export default function Matches() {
   const handleSetScoreChange = (
     setIndex: number,
     player: "one" | "two",
-    value: number,
+    value: number
   ) => {
     if (!selectedMatch) return;
 
@@ -347,9 +347,11 @@ export default function Matches() {
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
-                    {isCompleted
-                      ? <Chip label="Završen" size="small" color="success" />
-                      : <Chip label="Čeka" size="small" color="default" />}
+                    {isCompleted ? (
+                      <Chip label="Završen" size="small" color="success" />
+                    ) : (
+                      <Chip label="Čeka" size="small" color="default" />
+                    )}
                   </TableCell>
                   <TableCell align="center">
                     <Button
@@ -498,8 +500,9 @@ export default function Matches() {
                       value={formatDateTimeForInput(selectedMatch.scheduledAt)}
                       onChange={(e) =>
                         handleScheduledTimeChange(
-                          new Date(e.target.value).toISOString(),
-                        )}
+                          new Date(e.target.value).toISOString()
+                        )
+                      }
                       InputLabelProps={{
                         shrink: true,
                       }}
@@ -546,8 +549,9 @@ export default function Matches() {
                           handleSetScoreChange(
                             index,
                             "one",
-                            Number.parseInt(e.target.value) || 0,
-                          )}
+                            Number.parseInt(e.target.value) || 0
+                          )
+                        }
                         inputProps={{ min: 0, max: 20 }}
                         sx={{
                           "& .MuiInputBase-input": {
@@ -578,8 +582,9 @@ export default function Matches() {
                           handleSetScoreChange(
                             index,
                             "two",
-                            Number.parseInt(e.target.value) || 0,
-                          )}
+                            Number.parseInt(e.target.value) || 0
+                          )
+                        }
                         inputProps={{ min: 0, max: 20 }}
                         sx={{
                           "& .MuiInputBase-input": {
@@ -610,40 +615,38 @@ export default function Matches() {
                     const winner = getPlayer(winnerId);
                     const winnerGroup = getPlayerGroup(winnerId);
 
-                    return winnerId && winner
-                      ? (
-                        <>
-                          <Avatar
-                            sx={{
-                              bgcolor: winnerGroup?.color + ".main",
-                              width: { xs: 32, sm: 40 },
-                              height: { xs: 32, sm: 40 },
-                            }}
-                          >
-                            {winner.avatar}
-                          </Avatar>
-                          <Typography
-                            variant="h6"
-                            sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
-                          >
-                            {winner.firstName} {winner.lastName}
-                          </Typography>
-                          <Chip
-                            label="Pobjednik"
-                            color="success"
-                            size={isMobile ? "small" : "medium"}
-                          />
-                        </>
-                      )
-                      : (
-                        <Typography
-                          color="text.secondary"
-                          sx={{ fontSize: { xs: "0.9rem", sm: "1rem" } }}
+                    return winnerId && winner ? (
+                      <>
+                        <Avatar
+                          sx={{
+                            bgcolor: winnerGroup?.color + ".main",
+                            width: { xs: 32, sm: 40 },
+                            height: { xs: 32, sm: 40 },
+                          }}
                         >
-                          Pobjednik će biti automatski određen na osnovu
-                          osvojenih setova
+                          {winner.avatar}
+                        </Avatar>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
+                        >
+                          {winner.firstName} {winner.lastName}
                         </Typography>
-                      );
+                        <Chip
+                          label="Pobjednik"
+                          color="success"
+                          size={isMobile ? "small" : "medium"}
+                        />
+                      </>
+                    ) : (
+                      <Typography
+                        color="text.secondary"
+                        sx={{ fontSize: { xs: "0.9rem", sm: "1rem" } }}
+                      >
+                        Pobjednik će biti automatski određen na osnovu osvojenih
+                        setova
+                      </Typography>
+                    );
                   })()}
                 </Box>
               </Box>

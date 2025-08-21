@@ -1,18 +1,10 @@
 "use client";
 
-import {
-  Delete,
-  Edit,
-  Email,
-  Person,
-  Phone,
-  Search,
-} from "@mui/icons-material";
+import { Email, Person, Phone, Search } from "@mui/icons-material";
 import {
   Avatar,
   Box,
   Container,
-  IconButton,
   InputAdornment,
   Paper,
   Table,
@@ -25,10 +17,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { players } from "../constants/players";
+import { useUsers } from "../providers/UsersProvider";
 
 export default function Players() {
   const [searchTerm, setSearchTerm] = useState("");
+  const { users: players } = useUsers();
 
   const filteredPlayers = players.filter(
     (player) =>
@@ -92,9 +85,9 @@ export default function Players() {
               <TableCell sx={{ color: "white", fontWeight: 600 }}>
                 Email
               </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: 600 }}>
+              {/* <TableCell sx={{ color: "white", fontWeight: 600 }}>
                 Akcije
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -135,7 +128,7 @@ export default function Players() {
                     {player.email}
                   </Box>
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <Box sx={{ display: "flex", gap: 1 }}>
                     <IconButton size="small" color="primary">
                       <Edit fontSize="small" />
@@ -144,7 +137,7 @@ export default function Players() {
                       <Delete fontSize="small" />
                     </IconButton>
                   </Box>
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             ))}
           </TableBody>
