@@ -26,7 +26,7 @@ export default function Login() {
       setLoading(true);
       // We are just trying to have some way of user management, meaning that each user
       // has it's profile but is not bothered with the whole registration flow
-      const email = username + "@" + username;
+      const email = username + "@" + username + ".com";
       const password = username + "123";
       await signInWithEmailAndPassword(getAuth(app), email, password);
     } catch (error) {
