@@ -1,12 +1,4 @@
-import {
-  Create,
-  Delete,
-  Edit,
-  Group,
-  MoreVert,
-  Person,
-  Schedule,
-} from "@mui/icons-material";
+import { Delete, Edit, Group, MoreVert, Person } from "@mui/icons-material";
 import {
   Avatar,
   Box,
@@ -34,9 +26,7 @@ import useCollection, { getData } from "../hooks/useCollection";
 import { useUsers } from "../providers/UsersProvider";
 import type { TGroup, TMatch, TUser } from "../types";
 import { addCollectionItem } from "../utils/addCollectionItem";
-import { generateSchedule } from "../utils/generateSchedule";
 import { updateItem } from "../utils/updateItem";
-import { setCollectionItem } from "../utils/setCollectionItem";
 
 export const colors = [
   "#1976d2", // primary.main (blue)
@@ -144,23 +134,23 @@ export default function GroupsPage() {
     await refresh();
   };
 
-  const createSchedule = async () => {
-    const matches = await generateSchedule();
-    for (const match of matches) {
-      const doc = await addCollectionItem(
-        `groups/${match.groupId}/matches`,
-        match
-      );
-      await setCollectionItem(
-        `users/${match.playerOneId}/matches/${doc.id}`,
-        match
-      );
-      await setCollectionItem(
-        `users/${match.playerTwoId}/matches/${doc.id}`,
-        match
-      );
-    }
-  };
+  // const createSchedule = async () => {
+  //   const matches = await generateSchedule();
+  //   for (const match of matches) {
+  //     const doc = await addCollectionItem(
+  //       `groups/${match.groupId}/matches`,
+  //       match
+  //     );
+  //     await setCollectionItem(
+  //       `users/${match.playerOneId}/matches/${doc.id}`,
+  //       match
+  //     );
+  //     await setCollectionItem(
+  //       `users/${match.playerTwoId}/matches/${doc.id}`,
+  //       match
+  //     );
+  //   }
+  // };
 
   return (
     <>
@@ -192,7 +182,7 @@ export default function GroupsPage() {
         >
           {showOnlyMine ? "Prikaži sve grupe" : "Prikaži samo moju grupu"}
         </Button>
-        <Box sx={{ mb: 2 }}>
+        {/* <Box sx={{ mb: 2 }}>
           <Button
             variant="contained"
             onClick={() => setCreateGroup(true)}
@@ -208,7 +198,7 @@ export default function GroupsPage() {
           >
             Generiraj raspored
           </Button>
-        </Box>
+        </Box> */}
         <div className="flex flex-wrap gap-4">
           {sortBy(groups, "name").map((group) => (
             <Card
