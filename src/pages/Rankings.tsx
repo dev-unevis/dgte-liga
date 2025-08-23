@@ -1,7 +1,5 @@
-import { Leaderboard, Person } from "@mui/icons-material";
+import { Leaderboard } from "@mui/icons-material";
 import {
-  Avatar,
-  Box,
   Container,
   Paper,
   Table,
@@ -12,11 +10,11 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { useUsers } from "../providers/UsersProvider";
+import { reverse, sortBy, sum } from "lodash-es";
 import { useEffect, useState } from "react";
 import { getData } from "../hooks/useCollection";
+import { useUsers } from "../providers/UsersProvider";
 import type { TMatch } from "../types";
-import { reverse, sortBy, sum } from "lodash-es";
 
 type TRankItem = {
   numberOfWins: number;

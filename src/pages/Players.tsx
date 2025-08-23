@@ -16,10 +16,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { sortBy } from "lodash-es";
 import { useState } from "react";
 import { useUsers } from "../providers/UsersProvider";
-import { orderBy } from "firebase/firestore";
-import { sortBy } from "lodash-es";
 
 export default function Players() {
   const [searchTerm, setSearchTerm] = useState("");
