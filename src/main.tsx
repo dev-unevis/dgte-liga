@@ -19,6 +19,7 @@ import Register from "./pages/Register.tsx";
 import { UsersProvider } from "./providers/UsersProvider.tsx";
 import theme from "./theme.ts";
 import "dayjs/locale/hr";
+import { Rankings } from "./pages/Rankings.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -44,6 +45,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="groups" element={<Groups />} />
                 <Route path="matches" element={<Matches />} />
                 <Route path="profile" element={<ProfilePage />} />
+                <Route path="rankings" element={<Rankings />} />
               </Routes>
             </Layout>
             <Redirect />

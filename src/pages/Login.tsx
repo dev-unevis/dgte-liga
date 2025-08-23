@@ -1,4 +1,4 @@
-import { Lock, Person, Visibility, VisibilityOff } from "@mui/icons-material";
+import { Person } from "@mui/icons-material";
 import {
   Alert,
   Box,
@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   Container,
-  IconButton,
   InputAdornment,
   TextField,
   Typography,
@@ -18,8 +17,6 @@ import { app } from "../../firebase";
 
 export default function Login() {
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -30,6 +27,7 @@ export default function Login() {
       // We are just trying to have some way of user management, meaning that each user
       // has it's profile but is not bothered with the whole registration flow
       const email = username + "@" + username;
+      const password = username + "123";
       await signInWithEmailAndPassword(getAuth(app), email, password);
     } catch (error) {
       console.log(error);
@@ -41,9 +39,9 @@ export default function Login() {
     }
   };
 
-  const handleClickShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
+  // const handleClickShowPassword = () => {
+  //   setShowPassword(!showPassword);
+  // };
 
   return (
     <Container component="main" maxWidth="sm">
@@ -85,7 +83,7 @@ export default function Login() {
                   ),
                 }}
               />
-              <TextField
+              {/* <TextField
                 margin="normal"
                 required
                 fullWidth
@@ -114,7 +112,7 @@ export default function Login() {
                     </InputAdornment>
                   ),
                 }}
-              />
+              /> */}
 
               <Button
                 type="submit"

@@ -18,6 +18,8 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useUsers } from "../providers/UsersProvider";
+import { orderBy } from "firebase/firestore";
+import { sortBy } from "lodash-es";
 
 export default function Players() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -91,14 +93,12 @@ export default function Players() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredPlayers.map((player) => {
+            {sortBy(filteredPlayers, "lastName").map((player) => {
               // const defaultEmail =
               //   player.firstName.toLowerCase() +
-              //   "." +
               //   player.lastName.toLowerCase() +
               //   "@" +
               //   player.firstName.toLowerCase() +
-              //   "." +
               //   player.lastName.toLowerCase();
               // const isDefaultEmail = defaultEmail === player.email;
               return (

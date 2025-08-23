@@ -1,6 +1,15 @@
-import { Delete, Edit, Group, MoreVert, Person } from "@mui/icons-material";
+import {
+  Create,
+  Delete,
+  Edit,
+  Group,
+  MoreVert,
+  Person,
+  Schedule,
+} from "@mui/icons-material";
 import {
   Avatar,
+  Box,
   Button,
   Card,
   CardContent,
@@ -13,6 +22,8 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
 import { getAuth } from "firebase/auth";
 import { serverTimestamp } from "firebase/firestore";
 import { flatMap, reverse, sortBy } from "lodash-es";
@@ -23,7 +34,20 @@ import useCollection, { getData } from "../hooks/useCollection";
 import { useUsers } from "../providers/UsersProvider";
 import type { TGroup, TMatch, TUser } from "../types";
 import { addCollectionItem } from "../utils/addCollectionItem";
+import { generateSchedule } from "../utils/generateSchedule";
 import { updateItem } from "../utils/updateItem";
+import { setCollectionItem } from "../utils/setCollectionItem";
+
+export const colors = [
+  "#1976d2", // primary.main (blue)
+  "#9c27b0", // secondary.main (purple)
+  "#d32f2f", // error.main (red)
+  "#ed6c02", // warning.main (orange)
+  "#2e7d32", // success.main (green)
+  "#0288d1", // info.main (cyan/teal)
+  "#1565c0", // primary.dark (deep blue)
+  "#7b1fa2", // secondary.dark (deep purple)
+];
 
 export default function GroupsPage() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -33,16 +57,6 @@ export default function GroupsPage() {
   const { users: players } = useUsers();
   const { data, refresh } = useCollection<TGroup>("groups");
   const [groups, setGroups] = useState<TGroup[]>([]);
-  const colors = [
-    "#1976d2", // primary.main (blue)
-    "#9c27b0", // secondary.main (purple)
-    "#d32f2f", // error.main (red)
-    "#ed6c02", // warning.main (orange)
-    "#2e7d32", // success.main (green)
-    "#0288d1", // info.main (cyan/teal)
-    "#1565c0", // primary.dark (deep blue)
-    "#7b1fa2", // secondary.dark (deep purple)
-  ];
   const auth = getAuth();
   const [showOnlyMine, setShowOnlyMine] = useState(true);
 
@@ -130,12 +144,23 @@ export default function GroupsPage() {
     await refresh();
   };
 
-  // const createSchedule = async () => {
-  //   const matches = await generateSchedule();
-  //   for (const match of matches) {
-  //     await addCollectionItem(`groups/${match.groupId}/matches`, match);
-  //   }
-  // };
+  const createSchedule = async () => {
+    const matches = await generateSchedule();
+    for (const match of matches) {
+      const doc = await addCollectionItem(
+        `groups/${match.groupId}/matches`,
+        match
+      );
+      await setCollectionItem(
+        `users/${match.playerOneId}/matches/${doc.id}`,
+        match
+      );
+      await setCollectionItem(
+        `users/${match.playerTwoId}/matches/${doc.id}`,
+        match
+      );
+    }
+  };
 
   return (
     <>
@@ -150,14 +175,14 @@ export default function GroupsPage() {
             Grupe
           </Typography>
         </div>
-        {/* 
+
         <Box sx={{ mb: 2 }}>
           <DatePicker
             defaultValue={dayjs()}
             label={"Odaberi mjesec"}
             views={["month", "year"]}
           />
-        </Box> */}
+        </Box>
         <Button
           sx={{
             mb: 2,
@@ -167,7 +192,7 @@ export default function GroupsPage() {
         >
           {showOnlyMine ? "Prikaži sve grupe" : "Prikaži samo moju grupu"}
         </Button>
-        {/* <Box sx={{ mb: 2 }}>
+        <Box sx={{ mb: 2 }}>
           <Button
             variant="contained"
             onClick={() => setCreateGroup(true)}
@@ -183,7 +208,7 @@ export default function GroupsPage() {
           >
             Generiraj raspored
           </Button>
-        </Box> */}
+        </Box>
         <div className="flex flex-wrap gap-4">
           {sortBy(groups, "name").map((group) => (
             <Card
@@ -225,7 +250,7 @@ export default function GroupsPage() {
                       className="text-gray-700 font-medium flex items-center gap-1"
                     >
                       <Person fontSize="small" />
-                      Članovi grupe:
+                      Članovi skupine:
                     </Typography>
                     <div className="flex flex-col gap-2">
                       {reverse(sortBy(group.members, "pointsInGroup")).map(

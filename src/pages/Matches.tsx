@@ -16,9 +16,13 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  FormControl,
   Grid,
   IconButton,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
   Snackbar,
   Table,
   TableBody,
@@ -165,8 +169,17 @@ export default function Matches() {
     updatedMatch.status = winner ? "Završen" : "Čeka";
 
     const path = `groups/${updatedMatch.groupId}/matches`;
-
     await updateItem(path, selectedMatch.id, updatedMatch);
+    await updateItem(
+      `users/${selectedMatch.playerOneId}/matches`,
+      selectedMatch.id,
+      updatedMatch
+    );
+    await updateItem(
+      `users/${selectedMatch.playerTwoId}/matches`,
+      selectedMatch.id,
+      updatedMatch
+    );
     await refresh();
     setSnackbar({
       open: true,
@@ -465,7 +478,6 @@ export default function Matches() {
                 >
                   <Avatar
                     sx={{
-                      bgcolor: playerOneGroup?.color + ".main",
                       width: { xs: 40, sm: 48 },
                       height: { xs: 40, sm: 48 },
                     }}
@@ -482,7 +494,10 @@ export default function Matches() {
                     <Chip
                       label={playerOneGroup?.name}
                       size="small"
-                      color={playerOneGroup?.color as any}
+                      sx={{
+                        background: playerOneGroup?.color,
+                        color: "white",
+                      }}
                     />
                   </Box>
                 </Box>
@@ -514,12 +529,14 @@ export default function Matches() {
                     <Chip
                       label={playerTwoGroup?.name}
                       size="small"
-                      color={playerTwoGroup?.color as any}
+                      sx={{
+                        background: playerTwoGroup?.color,
+                        color: "white",
+                      }}
                     />
                   </Box>
                   <Avatar
                     sx={{
-                      bgcolor: playerTwoGroup?.color + ".main",
                       width: { xs: 40, sm: 48 },
                       height: { xs: 40, sm: 48 },
                     }}
@@ -592,29 +609,26 @@ export default function Matches() {
                     justifyContent="space-between"
                   >
                     <Grid width="40%">
-                      <TextField
-                        fullWidth
-                        type="number"
-                        label={`${playerOne?.firstName} - gemovi`}
-                        value={set.playerOneGames || null}
-                        onChange={(e) =>
-                          handleSetScoreChange(
-                            index,
-                            "one",
-                            Number.parseInt(e.target.value) || 0
-                          )
-                        }
-                        inputProps={{ min: 0, max: 20 }}
-                        sx={{
-                          "& .MuiInputBase-input": {
-                            fontSize: { xs: "0.9rem", sm: "1rem" },
-                            padding: { xs: "12px", sm: "16.5px 14px" },
-                          },
-                          "& .MuiInputLabel-root": {
-                            fontSize: { xs: "0.85rem", sm: "1rem" },
-                          },
-                        }}
-                      />
+                      <FormControl fullWidth>
+                        <InputLabel>{`${playerOne?.firstName} - gemovi`}</InputLabel>
+                        <Select
+                          label={`${playerOne?.firstName} - gemovi`}
+                          value={set.playerOneGames || 0}
+                          onChange={(e) =>
+                            handleSetScoreChange(
+                              index,
+                              "one",
+                              Number(e.target.value) || 0
+                            )
+                          }
+                        >
+                          {[...Array(8).keys()].map((gameCount) => (
+                            <MenuItem key={gameCount} value={gameCount}>
+                              {gameCount}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </Grid>
                     <Grid textAlign="center">
                       <Typography
@@ -625,29 +639,26 @@ export default function Matches() {
                       </Typography>
                     </Grid>
                     <Grid width="40%">
-                      <TextField
-                        fullWidth
-                        type="number"
-                        label={`${playerTwo?.firstName} - gemovi`}
-                        value={set.playerTwoGames || null}
-                        onChange={(e) =>
-                          handleSetScoreChange(
-                            index,
-                            "two",
-                            Number.parseInt(e.target.value) || 0
-                          )
-                        }
-                        inputProps={{ min: 0, max: 20 }}
-                        sx={{
-                          "& .MuiInputBase-input": {
-                            fontSize: { xs: "0.9rem", sm: "1rem" },
-                            padding: { xs: "12px", sm: "16.5px 14px" },
-                          },
-                          "& .MuiInputLabel-root": {
-                            fontSize: { xs: "0.85rem", sm: "1rem" },
-                          },
-                        }}
-                      />
+                      <FormControl fullWidth>
+                        <InputLabel>{`${playerTwo?.firstName} - gemovi`}</InputLabel>
+                        <Select
+                          label={`${playerTwo?.firstName} - gemovi`}
+                          value={set.playerTwoGames || 0}
+                          onChange={(e) =>
+                            handleSetScoreChange(
+                              index,
+                              "two",
+                              Number(e.target.value) || 0
+                            )
+                          }
+                        >
+                          {[...Array(8).keys()].map((gameCount) => (
+                            <MenuItem key={gameCount} value={gameCount}>
+                              {gameCount}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </Grid>
                   </Box>
                 </Box>

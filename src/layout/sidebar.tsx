@@ -1,6 +1,7 @@
 import {
   AccountCircle,
   Group,
+  Leaderboard,
   Logout,
   Menu,
   Person,
@@ -33,6 +34,7 @@ const menuItems = [
   { text: "Igrači", icon: <Person />, path: "/players" },
   { text: "Grupe", icon: <Group />, path: "/groups" },
   { text: "Raspored", icon: <Schedule />, path: "/matches" },
+  { text: "Rang lista", icon: <Leaderboard />, path: "/rankings" },
   { text: "Profil", icon: <AccountCircle />, path: "/profile" },
 ];
 
