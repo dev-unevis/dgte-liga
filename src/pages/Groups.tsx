@@ -27,6 +27,7 @@ import { useUsers } from "../providers/UsersProvider";
 import type { TGroup, TMatch, TUser } from "../types";
 import { addCollectionItem } from "../utils/addCollectionItem";
 import { updateItem } from "../utils/updateItem";
+import { useLoader } from "../providers/Loader";
 
 export const colors = [
   "#1976d2", // primary.main (blue)
@@ -49,8 +50,10 @@ export default function GroupsPage() {
   const [groups, setGroups] = useState<TGroup[]>([]);
   const auth = getAuth();
   const [showOnlyMine, setShowOnlyMine] = useState(true);
+  const { setLoading } = useLoader();
 
   const initialize = async () => {
+    setLoading(true);
     let items: TMatch[] = [];
 
     for (const group of data) {
@@ -79,6 +82,7 @@ export default function GroupsPage() {
           )
         : mappedGroups
     );
+    setLoading(false);
   };
 
   useEffect(() => {

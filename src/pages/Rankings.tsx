@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { getData } from "../hooks/useCollection";
 import { useUsers } from "../providers/UsersProvider";
 import type { TMatch } from "../types";
+import { useLoader } from "../providers/Loader";
 
 type TRankItem = {
   numberOfWins: number;
@@ -28,8 +29,10 @@ type TRankItem = {
 export const Rankings = () => {
   const { users, refresh } = useUsers();
   const [rankings, setRankings] = useState<TRankItem[]>([]);
+  const { setLoading } = useLoader();
 
   const initialize = async () => {
+    setLoading(true);
     const items: TRankItem[] = [];
     for (const user of users) {
       const matches = await getData<TMatch>(`users/${user.id}/matches`);
@@ -60,6 +63,7 @@ export const Rankings = () => {
     }
 
     setRankings(items);
+    setLoading(false);
   };
 
   useEffect(() => {

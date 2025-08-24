@@ -43,6 +43,7 @@ import { updateItem } from "../utils/updateItem";
 import type { Timestamp } from "firebase/firestore";
 import { sortBy } from "lodash-es";
 import { getAuth } from "firebase/auth";
+import { useLoader } from "../providers/Loader";
 
 export default function Matches() {
   const [selectedMatch, setSelectedMatch] = useState<TMatch | null>(null);
@@ -59,8 +60,10 @@ export default function Matches() {
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
   const auth = getAuth();
   const [showOnlyMine, setShowOnlyMine] = useState(true);
+  const { setLoading } = useLoader();
 
   const getGroupMatches = async () => {
+    setLoading(true);
     let items: TMatch[] = [];
 
     for (const group of sortBy(groups, "name")) {
@@ -76,6 +79,7 @@ export default function Matches() {
           )
         : items
     );
+    setLoading(false);
   };
 
   useEffect(() => {

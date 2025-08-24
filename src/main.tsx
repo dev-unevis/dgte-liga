@@ -20,38 +20,41 @@ import { UsersProvider } from "./providers/UsersProvider.tsx";
 import theme from "./theme.ts";
 import "dayjs/locale/hr";
 import { Rankings } from "./pages/Rankings.tsx";
+import { Loader } from "./providers/Loader.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <LocalizationProvider
-      dateAdapter={AdapterDayjs}
-      localeText={
-        hrHR.components.MuiLocalizationProvider.defaultProps.localeText
-      }
-      adapterLocale="hr"
-    >
-      <BrowserRouter>
-        <UsersProvider>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <WithAuth>
-              <Sidebar />
-            </WithAuth>
-            <Layout>
-              <Routes>
-                <Route path="login" element={<Login />} />
-                <Route path="register" element={<Register />} />
-                <Route path="players" element={<Players />} />
-                <Route path="groups" element={<Groups />} />
-                <Route path="matches" element={<Matches />} />
-                <Route path="profile" element={<ProfilePage />} />
-                <Route path="rankings" element={<Rankings />} />
-              </Routes>
-            </Layout>
-            <Redirect />
-          </ThemeProvider>
-        </UsersProvider>
-      </BrowserRouter>
-    </LocalizationProvider>
+    <Loader>
+      <LocalizationProvider
+        dateAdapter={AdapterDayjs}
+        localeText={
+          hrHR.components.MuiLocalizationProvider.defaultProps.localeText
+        }
+        adapterLocale="hr"
+      >
+        <BrowserRouter>
+          <UsersProvider>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <WithAuth>
+                <Sidebar />
+              </WithAuth>
+              <Layout>
+                <Routes>
+                  <Route path="login" element={<Login />} />
+                  <Route path="register" element={<Register />} />
+                  <Route path="players" element={<Players />} />
+                  <Route path="groups" element={<Groups />} />
+                  <Route path="matches" element={<Matches />} />
+                  <Route path="profile" element={<ProfilePage />} />
+                  <Route path="rankings" element={<Rankings />} />
+                </Routes>
+              </Layout>
+              <Redirect />
+            </ThemeProvider>
+          </UsersProvider>
+        </BrowserRouter>
+      </LocalizationProvider>
+    </Loader>
   </StrictMode>
 );
