@@ -202,44 +202,6 @@ export default function Matches() {
     return winner ? `${winner.firstName} ${winner.lastName}` : "-";
   };
 
-  const handleScheduledTimeChange = (newDateTime: string) => {
-    if (!selectedMatch) return;
-    setSelectedMatch({ ...selectedMatch, scheduledAt: new Date(newDateTime) });
-  };
-
-  const formatScheduledTime = (scheduledAt: Timestamp) => {
-    if (!scheduledAt) return "-";
-
-    try {
-      const date = scheduledAt.toDate();
-      if (isNaN(date.getTime())) return "-";
-      return date.toLocaleString("hr-HR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch (error) {
-      console.log("[v0] Error formatting scheduled time:", error);
-      return "-";
-    }
-  };
-
-  const formatDateTimeForInput = (scheduledAt: Date | Timestamp | null) => {
-    if (!scheduledAt) return "";
-
-    const date =
-      scheduledAt instanceof Date ? scheduledAt : scheduledAt.toDate();
-    try {
-      if (isNaN(date.getTime())) return "";
-      return date.toISOString().slice(0, 16);
-    } catch (error) {
-      console.log("[v0] Error formatting date:", error);
-      return "";
-    }
-  };
-
   const playerOne = selectedMatch ? getPlayer(selectedMatch.playerOneId) : null;
   const playerTwo = selectedMatch ? getPlayer(selectedMatch.playerTwoId) : null;
   const playerOneGroup = playerOne
@@ -288,9 +250,6 @@ export default function Matches() {
               </TableCell>
               <TableCell align="center">
                 <strong>Pobjednik</strong>
-              </TableCell>
-              <TableCell align="center">
-                <strong>Zakazano</strong>
               </TableCell>
               <TableCell align="center">
                 <strong>Status</strong>
@@ -403,11 +362,6 @@ export default function Matches() {
                   <TableCell align="center">
                     <Typography variant="body2">
                       {getMatchWinnerDisplay(match)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography variant="body2" fontSize="0.875rem">
-                      {formatScheduledTime(match.scheduledAt as Timestamp)}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
@@ -549,41 +503,6 @@ export default function Matches() {
                   </Avatar>
                 </Box>
               </Box>
-
-              {selectedMatch.status !== "Završen" && (
-                <>
-                  <Typography
-                    variant="h6"
-                    gutterBottom
-                    sx={{ fontSize: { xs: "1.1rem", sm: "1.25rem" } }}
-                  >
-                    Zakazano vrijeme
-                  </Typography>
-                  <Box mb={3}>
-                    <TextField
-                      fullWidth
-                      type="datetime-local"
-                      label="Datum i vrijeme meča"
-                      value={formatDateTimeForInput(selectedMatch.scheduledAt)}
-                      onChange={(e) =>
-                        handleScheduledTimeChange(
-                          new Date(e.target.value).toISOString()
-                        )
-                      }
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                      sx={{
-                        "& .MuiInputBase-input": {
-                          fontSize: { xs: "0.9rem", sm: "1rem" },
-                        },
-                      }}
-                    />
-                  </Box>
-                  <Divider sx={{ mb: 3 }} />
-                </>
-              )}
-
               <Typography
                 variant="h6"
                 gutterBottom
@@ -592,81 +511,140 @@ export default function Matches() {
                 Rezultati setova
               </Typography>
 
-              {selectedMatch.sets.map((set, index) => (
-                <Box
-                  key={index}
-                  mb={3}
-                  sx={{
-                    width: "100%",
-                  }}
-                >
-                  <Typography
-                    variant="subtitle1"
-                    gutterBottom
-                    sx={{ fontSize: { xs: "1rem", sm: "1.1rem" } }}
-                  >
-                    {index + 1}. set
-                  </Typography>
+              {selectedMatch.sets.map((set, index) => {
+                const isTieBreak = index + 1 === 3;
+                return (
                   <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="space-between"
+                    key={index}
+                    mb={3}
+                    sx={{
+                      width: "100%",
+                    }}
                   >
-                    <Grid width="40%">
-                      <FormControl fullWidth>
-                        <InputLabel>{`${playerOne?.firstName} - gemovi`}</InputLabel>
-                        <Select
-                          label={`${playerOne?.firstName} - gemovi`}
-                          value={set.playerOneGames || 0}
-                          onChange={(e) =>
-                            handleSetScoreChange(
-                              index,
-                              "one",
-                              Number(e.target.value) || 0
-                            )
-                          }
+                    <Typography
+                      variant="subtitle1"
+                      gutterBottom
+                      sx={{ fontSize: { xs: "1rem", sm: "1.1rem" } }}
+                    >
+                      {isTieBreak ? "Tie break" : index + 1 + ". set"}
+                    </Typography>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="space-between"
+                    >
+                      <Grid width="40%">
+                        <FormControl fullWidth>
+                          <InputLabel>{`${playerOne?.firstName} - ${
+                            isTieBreak ? "bodovi" : "gemovi"
+                          }`}</InputLabel>
+                          {isTieBreak ? (
+                            <TextField
+                              fullWidth
+                              type="number"
+                              label={`${playerOne?.firstName} - bodovi`}
+                              value={set.playerOneGames || null}
+                              onChange={(e) =>
+                                handleSetScoreChange(
+                                  index,
+                                  "one",
+                                  Number.parseInt(e.target.value) || 0
+                                )
+                              }
+                              inputProps={{ min: 0, max: 20 }}
+                              sx={{
+                                "& .MuiInputBase-input": {
+                                  fontSize: { xs: "0.9rem", sm: "1rem" },
+                                  padding: { xs: "12px", sm: "16.5px 14px" },
+                                },
+                                "& .MuiInputLabel-root": {
+                                  fontSize: { xs: "0.85rem", sm: "1rem" },
+                                },
+                              }}
+                            />
+                          ) : (
+                            <Select
+                              label={`${playerOne?.firstName} - gemovi`}
+                              value={set.playerOneGames || 0}
+                              onChange={(e) =>
+                                handleSetScoreChange(
+                                  index,
+                                  "one",
+                                  Number(e.target.value) || 0
+                                )
+                              }
+                            >
+                              {[...Array(8).keys()].map((gameCount) => (
+                                <MenuItem key={gameCount} value={gameCount}>
+                                  {gameCount}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          )}
+                        </FormControl>
+                      </Grid>
+                      <Grid textAlign="center">
+                        <Typography
+                          variant="h6"
+                          sx={{ fontSize: { xs: "1.2rem", sm: "1.5rem" } }}
                         >
-                          {[...Array(8).keys()].map((gameCount) => (
-                            <MenuItem key={gameCount} value={gameCount}>
-                              {gameCount}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                    <Grid textAlign="center">
-                      <Typography
-                        variant="h6"
-                        sx={{ fontSize: { xs: "1.2rem", sm: "1.5rem" } }}
-                      >
-                        -
-                      </Typography>
-                    </Grid>
-                    <Grid width="40%">
-                      <FormControl fullWidth>
-                        <InputLabel>{`${playerTwo?.firstName} - gemovi`}</InputLabel>
-                        <Select
-                          label={`${playerTwo?.firstName} - gemovi`}
-                          value={set.playerTwoGames || 0}
-                          onChange={(e) =>
-                            handleSetScoreChange(
-                              index,
-                              "two",
-                              Number(e.target.value) || 0
-                            )
-                          }
-                        >
-                          {[...Array(8).keys()].map((gameCount) => (
-                            <MenuItem key={gameCount} value={gameCount}>
-                              {gameCount}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
+                          -
+                        </Typography>
+                      </Grid>
+                      <Grid width="40%">
+                        <FormControl fullWidth>
+                          <InputLabel>{`${playerTwo?.firstName} - ${
+                            isTieBreak ? "bodovi" : "gemovi"
+                          }`}</InputLabel>
+                          {isTieBreak ? (
+                            <TextField
+                              fullWidth
+                              type="number"
+                              label={`${playerTwo?.firstName} - bodovi`}
+                              value={set.playerTwoGames || null}
+                              onChange={(e) =>
+                                handleSetScoreChange(
+                                  index,
+                                  "one",
+                                  Number.parseInt(e.target.value) || 0
+                                )
+                              }
+                              inputProps={{ min: 0, max: 20 }}
+                              sx={{
+                                "& .MuiInputBase-input": {
+                                  fontSize: { xs: "0.9rem", sm: "1rem" },
+                                  padding: { xs: "12px", sm: "16.5px 14px" },
+                                },
+                                "& .MuiInputLabel-root": {
+                                  fontSize: { xs: "0.85rem", sm: "1rem" },
+                                },
+                              }}
+                            />
+                          ) : (
+                            <Select
+                              label={`${playerTwo?.firstName} - gemovi`}
+                              value={set.playerTwoGames || 0}
+                              onChange={(e) =>
+                                handleSetScoreChange(
+                                  index,
+                                  "two",
+                                  Number(e.target.value) || 0
+                                )
+                              }
+                            >
+                              {[...Array(8).keys()].map((gameCount) => (
+                                <MenuItem key={gameCount} value={gameCount}>
+                                  {gameCount}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          )}
+                        </FormControl>
+                      </Grid>
+                    </Box>
                   </Box>
-                </Box>
-              ))}
+                );
+              })}
 
               <Box mb={3}>
                 <Typography
