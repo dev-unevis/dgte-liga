@@ -15,7 +15,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   FormControl,
   Grid,
   IconButton,
@@ -35,15 +34,14 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import { getAuth } from "firebase/auth";
+import { sortBy } from "lodash-es";
 import { useEffect, useState } from "react";
 import useCollection, { getData } from "../hooks/useCollection";
+import { useLoader } from "../providers/Loader";
 import { useUsers } from "../providers/UsersProvider";
 import type { TGroup, TMatch } from "../types";
 import { updateItem } from "../utils/updateItem";
-import type { Timestamp } from "firebase/firestore";
-import { sortBy } from "lodash-es";
-import { getAuth } from "firebase/auth";
-import { useLoader } from "../providers/Loader";
 
 export default function Matches() {
   const [selectedMatch, setSelectedMatch] = useState<TMatch | null>(null);
