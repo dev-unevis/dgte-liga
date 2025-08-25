@@ -532,35 +532,33 @@ export default function Matches() {
                       justifyContent="space-between"
                     >
                       <Grid width="40%">
-                        <FormControl fullWidth>
-                          <InputLabel>{`${playerOne?.firstName} - ${
-                            isTieBreak ? "bodovi" : "gemovi"
-                          }`}</InputLabel>
-                          {isTieBreak ? (
-                            <TextField
-                              fullWidth
-                              type="number"
-                              label={`${playerOne?.firstName} - bodovi`}
-                              value={set.playerOneGames || null}
-                              onChange={(e) =>
-                                handleSetScoreChange(
-                                  index,
-                                  "one",
-                                  Number.parseInt(e.target.value) || 0
-                                )
-                              }
-                              inputProps={{ min: 0, max: 20 }}
-                              sx={{
-                                "& .MuiInputBase-input": {
-                                  fontSize: { xs: "0.9rem", sm: "1rem" },
-                                  padding: { xs: "12px", sm: "16.5px 14px" },
-                                },
-                                "& .MuiInputLabel-root": {
-                                  fontSize: { xs: "0.85rem", sm: "1rem" },
-                                },
-                              }}
-                            />
-                          ) : (
+                        {isTieBreak ? (
+                          <TextField
+                            fullWidth
+                            type="number"
+                            label={`${playerOne?.firstName} - bodovi`}
+                            value={set.playerOneGames || null}
+                            onChange={(e) =>
+                              handleSetScoreChange(
+                                index,
+                                "one",
+                                Number.parseInt(e.target.value) || 0
+                              )
+                            }
+                            inputProps={{ min: 0, max: 20 }}
+                            sx={{
+                              "& .MuiInputBase-input": {
+                                fontSize: { xs: "0.9rem", sm: "1rem" },
+                                padding: { xs: "12px", sm: "16.5px 14px" },
+                              },
+                              "& .MuiInputLabel-root": {
+                                fontSize: { xs: "0.85rem", sm: "1rem" },
+                              },
+                            }}
+                          />
+                        ) : (
+                          <FormControl fullWidth>
+                            <InputLabel>{`${playerOne?.firstName} - gemovi`}</InputLabel>
                             <Select
                               label={`${playerOne?.firstName} - gemovi`}
                               value={set.playerOneGames || 0}
@@ -578,8 +576,8 @@ export default function Matches() {
                                 </MenuItem>
                               ))}
                             </Select>
-                          )}
-                        </FormControl>
+                          </FormControl>
+                        )}
                       </Grid>
                       <Grid textAlign="center">
                         <Typography
@@ -590,35 +588,33 @@ export default function Matches() {
                         </Typography>
                       </Grid>
                       <Grid width="40%">
-                        <FormControl fullWidth>
-                          <InputLabel>{`${playerTwo?.firstName} - ${
-                            isTieBreak ? "bodovi" : "gemovi"
-                          }`}</InputLabel>
-                          {isTieBreak ? (
-                            <TextField
-                              fullWidth
-                              type="number"
-                              label={`${playerTwo?.firstName} - bodovi`}
-                              value={set.playerTwoGames || null}
-                              onChange={(e) =>
-                                handleSetScoreChange(
-                                  index,
-                                  "one",
-                                  Number.parseInt(e.target.value) || 0
-                                )
-                              }
-                              inputProps={{ min: 0, max: 20 }}
-                              sx={{
-                                "& .MuiInputBase-input": {
-                                  fontSize: { xs: "0.9rem", sm: "1rem" },
-                                  padding: { xs: "12px", sm: "16.5px 14px" },
-                                },
-                                "& .MuiInputLabel-root": {
-                                  fontSize: { xs: "0.85rem", sm: "1rem" },
-                                },
-                              }}
-                            />
-                          ) : (
+                        {isTieBreak ? (
+                          <TextField
+                            fullWidth
+                            type="number"
+                            label={`${playerTwo?.firstName} - bodovi`}
+                            value={set.playerTwoGames || null}
+                            onChange={(e) =>
+                              handleSetScoreChange(
+                                index,
+                                "two",
+                                Number.parseInt(e.target.value) || 0
+                              )
+                            }
+                            inputProps={{ min: 0, max: 20 }}
+                            sx={{
+                              "& .MuiInputBase-input": {
+                                fontSize: { xs: "0.9rem", sm: "1rem" },
+                                padding: { xs: "12px", sm: "16.5px 14px" },
+                              },
+                              "& .MuiInputLabel-root": {
+                                fontSize: { xs: "0.85rem", sm: "1rem" },
+                              },
+                            }}
+                          />
+                        ) : (
+                          <FormControl fullWidth>
+                            <InputLabel>{`${playerTwo?.firstName} - gemovi`}</InputLabel>
                             <Select
                               label={`${playerTwo?.firstName} - gemovi`}
                               value={set.playerTwoGames || 0}
@@ -636,8 +632,8 @@ export default function Matches() {
                                 </MenuItem>
                               ))}
                             </Select>
-                          )}
-                        </FormControl>
+                          </FormControl>
+                        )}
                       </Grid>
                     </Box>
                   </Box>

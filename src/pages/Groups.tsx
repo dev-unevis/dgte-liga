@@ -1,7 +1,6 @@
 import { Delete, Edit, Group, MoreVert, Person } from "@mui/icons-material";
 import {
   Avatar,
-  Box,
   Button,
   Card,
   CardContent,
@@ -14,8 +13,6 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
 import { getAuth } from "firebase/auth";
 import { serverTimestamp } from "firebase/firestore";
 import { flatMap, reverse, sortBy } from "lodash-es";
@@ -23,11 +20,11 @@ import { useEffect, useMemo, useState } from "react";
 import CreateGroupModal from "../components/CreateGroupModal";
 import EditGroupModal from "../components/EditGroupModal";
 import useCollection, { getData } from "../hooks/useCollection";
+import { useLoader } from "../providers/Loader";
 import { useUsers } from "../providers/UsersProvider";
 import type { TGroup, TMatch, TUser } from "../types";
 import { addCollectionItem } from "../utils/addCollectionItem";
 import { updateItem } from "../utils/updateItem";
-import { useLoader } from "../providers/Loader";
 
 export const colors = [
   "#1976d2", // primary.main (blue)
@@ -170,13 +167,13 @@ export default function GroupsPage() {
           </Typography>
         </div>
 
-        <Box sx={{ mb: 2 }}>
+        {/* <Box sx={{ mb: 2 }}>
           <DatePicker
             defaultValue={dayjs()}
             label={"Odaberi mjesec"}
             views={["month", "year"]}
           />
-        </Box>
+        </Box> */}
         <Button
           sx={{
             mb: 2,

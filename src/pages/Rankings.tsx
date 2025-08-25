@@ -101,6 +101,12 @@ export const Rankings = () => {
                 <strong>Broj pobjeda</strong>
               </TableCell>
               <TableCell>
+                <strong>Dobiveni gemovi</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Izgubljeni gemovi</strong>
+              </TableCell>
+              <TableCell>
                 <strong>Gem razlika</strong>
               </TableCell>
               <TableCell>
@@ -140,8 +146,14 @@ export const Rankings = () => {
                     <Typography variant="body2">{rank.numberOfWins}</Typography>
                   </TableCell>
                   <TableCell>
+                    <Typography variant="body2">{rank.gamesWon}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{rank.gamesLost}</Typography>
+                  </TableCell>
+                  <TableCell>
                     <Typography variant="body2">
-                      {rank.gamesWon} - {rank.gamesLost}
+                      {rank.gamesWon - rank.gamesLost}
                     </Typography>
                   </TableCell>
                   <TableCell>
