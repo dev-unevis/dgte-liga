@@ -128,9 +128,20 @@ export default function Players() {
                     {player.lastName}
                   </TableCell>
                   <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Phone fontSize="small" color="action" />
-                      {player.phone}
+                    <Box>
+                      <a
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: '8px',
+                          textDecoration: 'underline',
+                          color: 'blue'
+                        }}
+                        href={`tel:${player.phone}`}
+                      >
+                        <Phone fontSize="small" color="action" />
+                        {player.phone}
+                      </a>
                     </Box>
                   </TableCell>
                   {/* <TableCell>
