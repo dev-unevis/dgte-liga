@@ -18,7 +18,7 @@ export default function Redirect() {
 
   onAuthStateChanged(auth, (user) => {
     if (!user?.uid) return redirectToLogin();
-    if (location.pathname.includes("login")) navigate("/players");
+    if (location.pathname.includes("login")) navigate("/");
   });
 
   return <></>;

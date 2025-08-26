@@ -63,7 +63,7 @@ export default function Home() {
             <CardContent sx={{ p: 4 }}>
               <List>
                 <ListItem>
-                  <ListItemText primary="U skupini će biti 4 igrača i na kraju mjeseca najbolje plasirani u skupini prelazi u jaču skupinu, a najlošije plasirani u slabiju skupinu" />
+                  <ListItemText primary="Skupine sadrže 4 igrača, na kraju mjeseca najbolje plasirani u skupini prelazi u jaču skupinu, a najlošije plasirani u slabiju skupinu" />
                 </ListItem>
                 <ListItem>
                   <ListItemText primary="Svatko igra 3 meča u mjesecu." />
