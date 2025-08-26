@@ -21,6 +21,7 @@ import theme from "./theme.ts";
 import "dayjs/locale/hr";
 import { Rankings } from "./pages/Rankings.tsx";
 import { Loader } from "./providers/Loader.tsx";
+import Home from "./pages/Home.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -48,7 +49,8 @@ createRoot(document.getElementById("root")!).render(
                   <Route path="matches" element={<Matches />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="rankings" element={<Rankings />} />
-                </Routes>
+                  <Route path="/" element={<Home />} />
+                 </Routes>
               </Layout>
               <Redirect />
             </ThemeProvider>
