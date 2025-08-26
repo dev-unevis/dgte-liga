@@ -138,7 +138,7 @@ export default function Home() {
               Različita pravila za vanjsko i unutarnje igranje
             </Typography>
           </Box>
-          <div className="flex w-full justify-center items-center gap-10">
+          <div className="flex w-full justify-center items-center flex-wrap gap-10">
             <Card sx={{ height: "100%", boxShadow: 2 }}>
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
