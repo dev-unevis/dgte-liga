@@ -1,23 +1,20 @@
 import {
+  Schedule as Clock,
+  EuroSymbol as Euro,
+  LocationOn as MapPin,
+  EmojiEvents as Trophy,
+} from "@mui/icons-material";
+import {
   Box,
-  Typography,
-  Button,
   Card,
   CardContent,
-  Grid,
   Container,
   List,
   ListItem,
   ListItemText,
-  Divider,
   Paper,
+  Typography
 } from "@mui/material";
-import {
-  EuroSymbol as Euro,
-  Schedule as Clock,
-  LocationOn as MapPin,
-  EmojiEvents as Trophy,
-} from "@mui/icons-material";
 
 export default function Home() {
   return (
