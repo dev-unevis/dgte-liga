@@ -46,8 +46,15 @@ export default function GroupsPage() {
   const { data, refresh } = useCollection<TGroup>("groups");
   const [groups, setGroups] = useState<TGroup[]>([]);
   const auth = getAuth();
+  const player = players.find((p) => p.id === auth.currentUser?.uid);
   const [showOnlyMine, setShowOnlyMine] = useState(true);
   const { setLoading } = useLoader();
+
+  useEffect(() => {
+    if (player && player.isAdmin) {
+      setShowOnlyMine(false);
+    }
+  }, [auth.currentUser, players]);
 
   const initialize = async () => {
     setLoading(true);

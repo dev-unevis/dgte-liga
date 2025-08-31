@@ -57,8 +57,15 @@ export default function Matches() {
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
   const auth = getAuth();
+  const player = players.find((p) => p.id === auth.currentUser?.uid);
   const [showOnlyMine, setShowOnlyMine] = useState(true);
   const { setLoading } = useLoader();
+
+  useEffect(() => {
+    if (player && player.isAdmin) {
+      setShowOnlyMine(false);
+    }
+  }, [auth.currentUser, players]);
 
   const getGroupMatches = async () => {
     setLoading(true);

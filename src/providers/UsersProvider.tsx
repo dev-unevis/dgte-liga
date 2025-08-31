@@ -14,6 +14,7 @@ const useUsers = () =>
 
 const UsersProvider = ({ children }: { children: ReactNode }) => {
   const { data, refresh } = useCollection<TUser>("users");
+
   return (
     <UsersContext.Provider
       value={{

@@ -92,59 +92,67 @@ export default function Players() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortBy(filteredPlayers, "lastName").map((player) => {
-              // const defaultEmail =
-              //   player.firstName.toLowerCase() +
-              //   player.lastName.toLowerCase() +
-              //   "@" +
-              //   player.firstName.toLowerCase() +
-              //   player.lastName.toLowerCase();
-              // const isDefaultEmail = defaultEmail === player.email;
-              return (
-                <TableRow
-                  key={player.id}
-                  sx={{
-                    "&:hover": { backgroundColor: "action.hover" },
-                    "&:nth-of-type(odd)": {
-                      backgroundColor: "action.selected",
-                    },
-                  }}
-                >
-                  <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      <Avatar
-                        sx={{ bgcolor: "primary.main", width: 40, height: 40 }}
-                        className="text-sm!"
+            {sortBy(filteredPlayers, "lastName")
+              .filter((t) => !t.isAdmin)
+              .map((player) => {
+                // const defaultEmail =
+                //   player.firstName.toLowerCase() +
+                //   player.lastName.toLowerCase() +
+                //   "@" +
+                //   player.firstName.toLowerCase() +
+                //   player.lastName.toLowerCase();
+                // const isDefaultEmail = defaultEmail === player.email;
+                return (
+                  <TableRow
+                    key={player.id}
+                    sx={{
+                      "&:hover": { backgroundColor: "action.hover" },
+                      "&:nth-of-type(odd)": {
+                        backgroundColor: "action.selected",
+                      },
+                    }}
+                  >
+                    <TableCell>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
                       >
-                        {player.firstName[0]}
-                        {player.lastName[0]}
-                      </Avatar>
-                    </Box>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 500 }}>
-                    {player.firstName}
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 500 }}>
-                    {player.lastName}
-                  </TableCell>
-                  <TableCell>
-                    <Box>
-                      <a
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: '8px',
-                          textDecoration: 'underline',
-                          color: 'blue'
-                        }}
-                        href={`tel:${player.phone}`}
-                      >
-                        <Phone fontSize="small" color="action" />
-                        {player.phone}
-                      </a>
-                    </Box>
-                  </TableCell>
-                  {/* <TableCell>
+                        <Avatar
+                          sx={{
+                            bgcolor: "primary.main",
+                            width: 40,
+                            height: 40,
+                          }}
+                          className="text-sm!"
+                        >
+                          {player.firstName[0]}
+                          {player.lastName[0]}
+                        </Avatar>
+                      </Box>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 500 }}>
+                      {player.firstName}
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 500 }}>
+                      {player.lastName}
+                    </TableCell>
+                    <TableCell>
+                      <Box>
+                        <a
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            textDecoration: "underline",
+                            color: "blue",
+                          }}
+                          href={`tel:${player.phone}`}
+                        >
+                          <Phone fontSize="small" color="action" />
+                          {player.phone}
+                        </a>
+                      </Box>
+                    </TableCell>
+                    {/* <TableCell>
                     {!isDefaultEmail ? (
                       <Box
                         sx={{ display: "flex", alignItems: "center", gap: 1 }}
@@ -156,7 +164,7 @@ export default function Players() {
                       "-"
                     )}
                   </TableCell> */}
-                  {/* <TableCell>
+                    {/* <TableCell>
                   <Box sx={{ display: "flex", gap: 1 }}>
                     <IconButton size="small" color="primary">
                       <Edit fontSize="small" />
@@ -166,9 +174,9 @@ export default function Players() {
                     </IconButton>
                   </Box>
                 </TableCell> */}
-                </TableRow>
-              );
-            })}
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
       </TableContainer>

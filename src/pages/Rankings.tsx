@@ -35,6 +35,7 @@ export const Rankings = () => {
     setLoading(true);
     const items: TRankItem[] = [];
     for (const user of users) {
+      if (user.isAdmin) continue;
       const matches = await getData<TMatch>(`users/${user.id}/matches`);
       let gamesWon = 0;
       let gamesLost = 0;

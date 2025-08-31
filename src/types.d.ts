@@ -7,6 +7,7 @@ export type TUser = {
   avatar: string;
   email: string;
   phone: string;
+  isAdmin: boolean;
 };
 
 export interface EditGroupModalProps {

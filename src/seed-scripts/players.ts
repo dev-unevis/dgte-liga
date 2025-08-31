@@ -1,5 +1,12 @@
 export const players = [
   {
+    firstName: "Davor",
+    lastName: "Grgić",
+    phone: "+385913454557",
+    email: "davorgrgić@davorgrgić.com",
+    password: "davorgrgić123",
+  },
+  {
     firstName: "Marko",
     lastName: "Jović",
     phone: "+385989003751",
