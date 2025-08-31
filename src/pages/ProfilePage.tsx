@@ -31,6 +31,7 @@ export default function ProfilePage() {
     email: "",
     avatar: "",
     id: "",
+    isAdmin: false,
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
