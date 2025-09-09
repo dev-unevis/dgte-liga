@@ -42,11 +42,19 @@ export const Rankings = () => {
 
       matches.forEach((match) => {
         if (match.playerOneId === user.id) {
-          gamesWon += sum(match.sets.map((t) => t.playerOneGames));
-          gamesLost += sum(match.sets.map((t) => t.playerTwoGames));
+          gamesWon += sum(
+            match.sets.filter((t, i) => i !== 2).map((t) => t.playerOneGames)
+          );
+          gamesLost += sum(
+            match.sets.filter((t, i) => i !== 2).map((t) => t.playerTwoGames)
+          );
         } else {
-          gamesWon += sum(match.sets.map((t) => t.playerTwoGames));
-          gamesLost += sum(match.sets.map((t) => t.playerOneGames));
+          gamesWon += sum(
+            match.sets.filter((t, i) => i !== 2).map((t) => t.playerTwoGames)
+          );
+          gamesLost += sum(
+            match.sets.filter((t, i) => i !== 2).map((t) => t.playerOneGames)
+          );
         }
       });
 
