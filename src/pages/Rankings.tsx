@@ -40,8 +40,7 @@ export const Rankings = () => {
       let gamesWon = 0;
       let gamesLost = 0;
 
-      matches.forEach((match, index) => {
-        if (index === 2) return; // Don't include tie break
+      matches.forEach((match) => {
         if (match.playerOneId === user.id) {
           gamesWon += sum(match.sets.map((t) => t.playerOneGames));
           gamesLost += sum(match.sets.map((t) => t.playerTwoGames));
