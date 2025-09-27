@@ -57,11 +57,9 @@ export default function ProfilePage() {
         await updateItem("users", profile.id, editedProfile);
         const defaultEmail =
           profile.firstName.toLowerCase() +
-          "." +
           profile.lastName.toLowerCase() +
           "@" +
           profile.firstName.toLowerCase() +
-          "." +
           profile.lastName.toLowerCase();
         const email = !isEmpty(editedProfile.email)
           ? editedProfile.email
