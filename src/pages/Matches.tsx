@@ -62,7 +62,7 @@ export default function Matches() {
   const { setLoading } = useLoader();
 
   useEffect(() => {
-    if (player && player.isAdmin) {
+    if (player && player.is_viewer) {
       setShowOnlyMine(false);
     }
   }, [auth.currentUser, players]);

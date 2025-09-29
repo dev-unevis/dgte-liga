@@ -1,10 +1,11 @@
 "use client";
 
-import { Person, Phone, Search } from "@mui/icons-material";
+import { Delete, Person, Phone, Search } from "@mui/icons-material";
 import {
   Avatar,
   Box,
   Container,
+  IconButton,
   InputAdornment,
   Paper,
   Table,
@@ -26,7 +27,7 @@ export default function Players() {
 
   const filteredPlayers = players.filter(
     (player) =>
-      `${player.firstName} ${player.lastName}`
+      `${player.first_name} ${player.last_name}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       player.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -83,25 +84,15 @@ export default function Players() {
               <TableCell sx={{ color: "white", fontWeight: 600 }}>
                 Telefon
               </TableCell>
-              {/* <TableCell sx={{ color: "white", fontWeight: 600 }}>
-                Email
-              </TableCell> */}
-              {/* <TableCell sx={{ color: "white", fontWeight: 600 }}>
+              <TableCell sx={{ color: "white", fontWeight: 600 }}>
                 Akcije
-              </TableCell> */}
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {sortBy(filteredPlayers, "lastName")
-              .filter((t) => !t.isAdmin)
+              .filter((t) => !t.is_viewer)
               .map((player) => {
-                // const defaultEmail =
-                //   player.firstName.toLowerCase() +
-                //   player.lastName.toLowerCase() +
-                //   "@" +
-                //   player.firstName.toLowerCase() +
-                //   player.lastName.toLowerCase();
-                // const isDefaultEmail = defaultEmail === player.email;
                 return (
                   <TableRow
                     key={player.id}
@@ -124,16 +115,16 @@ export default function Players() {
                           }}
                           className="text-sm!"
                         >
-                          {player.firstName[0]}
-                          {player.lastName[0]}
+                          {player.first_name[0]}
+                          {player.last_name[0]}
                         </Avatar>
                       </Box>
                     </TableCell>
                     <TableCell sx={{ fontWeight: 500 }}>
-                      {player.firstName}
+                      {player.first_name}
                     </TableCell>
                     <TableCell sx={{ fontWeight: 500 }}>
-                      {player.lastName}
+                      {player.last_name}
                     </TableCell>
                     <TableCell>
                       <Box>
@@ -152,28 +143,13 @@ export default function Players() {
                         </a>
                       </Box>
                     </TableCell>
-                    {/* <TableCell>
-                    {!isDefaultEmail ? (
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <Email fontSize="small" color="action" />
-                        {player.email}
+                    <TableCell>
+                      <Box sx={{ display: "flex", gap: 1 }}>
+                        <IconButton size="small" color="error">
+                          <Delete fontSize="small" />
+                        </IconButton>
                       </Box>
-                    ) : (
-                      "-"
-                    )}
-                  </TableCell> */}
-                    {/* <TableCell>
-                  <Box sx={{ display: "flex", gap: 1 }}>
-                    <IconButton size="small" color="primary">
-                      <Edit fontSize="small" />
-                    </IconButton>
-                    <IconButton size="small" color="error">
-                      <Delete fontSize="small" />
-                    </IconButton>
-                  </Box>
-                </TableCell> */}
+                    </TableCell>
                   </TableRow>
                 );
               })}

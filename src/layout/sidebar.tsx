@@ -24,10 +24,9 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { getAuth, signOut } from "firebase/auth";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { app } from "../../firebase";
+import { supabase } from "../utils/supabase";
 
 const drawerWidth = 240;
 
@@ -100,7 +99,7 @@ export function Sidebar() {
         sx={{
           marginTop: "auto",
         }}
-        onClick={() => signOut(getAuth(app))}
+        onClick={() => supabase.auth.signOut()}
         startIcon={<Logout />}
       >
         Odjava

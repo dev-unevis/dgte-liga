@@ -43,7 +43,6 @@ export default function GroupsPage() {
   const [open, setIsOpen] = useState(false);
   const [createGroup, setCreateGroup] = useState(false);
   const { users: players } = useUsers();
-  const { data, refresh } = useCollection<TGroup>("groups");
   const [groups, setGroups] = useState<TGroup[]>([]);
   const auth = getAuth();
   const player = players.find((p) => p.id === auth.currentUser?.uid);
@@ -51,7 +50,7 @@ export default function GroupsPage() {
   const { setLoading } = useLoader();
 
   useEffect(() => {
-    if (player && player.isAdmin) {
+    if (player && player.is_viewer) {
       setShowOnlyMine(false);
     }
   }, [auth.currentUser, players]);
@@ -74,7 +73,8 @@ export default function GroupsPage() {
             ...member,
             ...player,
             pointsInGroup:
-              items.filter((match) => match.winnerId === player?.id).length * 3,
+              items.filter((match) => match.winner_id === player?.id).length *
+              3,
           };
         }),
       };
@@ -82,7 +82,7 @@ export default function GroupsPage() {
     setGroups(
       showOnlyMine
         ? mappedGroups.filter((g) =>
-            g.memberIds.includes(auth.currentUser?.uid as string)
+            g.member_ids.includes(auth.currentUser?.uid as string)
           )
         : mappedGroups
     );
@@ -266,15 +266,15 @@ export default function GroupsPage() {
                                 variant="body2"
                                 className="font-medium text-gray-800 truncate"
                               >
-                                {member.firstName}
+                                {member.first_name}
                                 &nbsp;
-                                {member.lastName}
+                                {member.last_name}
                               </Typography>
                               <Typography
                                 variant="body2"
                                 className="font-medium text-gray-800 truncate"
                               >
-                                {member.pointsInGroup}
+                                {member.points_in_group}
                               </Typography>
                             </div>
                           </div>
