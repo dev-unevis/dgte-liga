@@ -22,7 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import type { EditGroupModalProps, TUser } from "../types";
+import type { EditGroupModalProps, TGroupMember, TUser } from "../types";
 
 export default function EditGroupModal({
   open,
@@ -33,7 +33,7 @@ export default function EditGroupModal({
   onSave,
 }: EditGroupModalProps) {
   const [groupName, setGroupName] = useState(name);
-  const [members, setMembers] = useState<TUser[]>(currentMembers);
+  const [members, setMembers] = useState<TGroupMember[]>(currentMembers);
   const [selectedMembers, setSelectedMembers] = useState<TUser[]>([]);
 
   const handleAddMembers = () => {
@@ -114,7 +114,7 @@ export default function EditGroupModal({
               sx={{ flex: 1 }}
               options={filteredAvailableMembers}
               getOptionLabel={(option) =>
-                `${option.firstName} ${option.lastName}`
+                `${option.first_name} ${option.last_name}`
               }
               value={selectedMembers}
               onChange={(_, newValue) =>
@@ -135,7 +135,7 @@ export default function EditGroupModal({
                   >
                     {option.avatar}
                   </Avatar>
-                  <p>{`${option.firstName} ${option.lastName}`}</p>
+                  <p>{`${option.first_name} ${option.last_name}`}</p>
                 </Box>
               )}
               noOptionsText="Nema dostupnih članova"
@@ -183,11 +183,11 @@ export default function EditGroupModal({
                 <ListItem key={member.id} divider={index < members.length - 1}>
                   <ListItemAvatar>
                     <Avatar sx={{ bgcolor: "primary.main" }}>
-                      {member.avatar}
+                      {member.user.avatar}
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
-                    primary={`${member.firstName} ${member.lastName}`}
+                    primary={`${member.user.first_name} ${member.user.last_name}`}
                     secondary={`Poredak - ${index + 1}`}
                   />
                   <ListItemSecondaryAction>
@@ -196,7 +196,6 @@ export default function EditGroupModal({
                       onClick={() => handleRemoveMember(member.id)}
                       color="error"
                       size="small"
-                      disabled={true}
                     >
                       <DeleteIcon />
                     </IconButton>

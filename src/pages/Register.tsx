@@ -14,6 +14,54 @@ import type React from "react";
 import { useState } from "react";
 import { supabase } from "../utils/supabase";
 
+export function normalizeCroatianChars(text: string): string {
+  if (!text) {
+    return "";
+  }
+
+  // Step 1: Handle Digraphs (DŽ, LJ, NJ) first.
+  // The most common transliteration keeps LJ/NJ as is, and DŽ as DZ.
+  let normalizedText = text;
+
+  // Use .replace() for case-insensitive global replacement (requires the 'g' flag)
+  // Note: Older environments might need to chain multiple .replace() calls or polyfill .replaceAll()
+  normalizedText = normalizedText
+    .replace(/DŽ/g, "DZ")
+    .replace(/Dž/g, "Dz")
+    .replace(/dž/g, "dz")
+    .replace(/LJ/g, "LJ")
+    .replace(/Lj/g, "Lj")
+    .replace(/lj/g, "lj")
+    .replace(/NJ/g, "NJ")
+    .replace(/Nj/g, "Nj")
+    .replace(/nj/g, "nj");
+
+  // Step 2: Handle single-character diacritics (Č, Ć, Š, Ž, Đ)
+  const singleCharMap: { [key: string]: string } = {
+    Č: "C",
+    č: "c",
+    Ć: "C",
+    ć: "c",
+    Š: "S",
+    š: "s",
+    Ž: "Z",
+    ž: "z",
+    Đ: "D",
+    đ: "d",
+  };
+
+  // Create a regular expression to match all single diacritical characters
+  const charRegex = /[ČčĆćŠšŽžĐđ]/g;
+
+  // Use a replacement function to look up the correct substitute from the map
+  normalizedText = normalizedText.replace(charRegex, (match: string) => {
+    // We know 'match' will be a key in singleCharMap
+    return singleCharMap[match];
+  });
+
+  return normalizedText;
+}
+
 export default function Register() {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -43,7 +91,7 @@ export default function Register() {
 
       const email = fullName + "@" + fullName + ".com";
       const { data } = await supabase.auth.signUp({
-        email: email,
+        email: normalizeCroatianChars(email),
         password:
           formData.firstName.toLowerCase() +
           formData.lastName.toLowerCase() +

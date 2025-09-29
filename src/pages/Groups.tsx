@@ -1,6 +1,14 @@
-import { Delete, Edit, Group, MoreVert, Person } from "@mui/icons-material";
+import {
+  Create,
+  Delete,
+  Edit,
+  Group,
+  MoreVert,
+  Person,
+} from "@mui/icons-material";
 import {
   Avatar,
+  Box,
   Button,
   Card,
   CardContent,
@@ -13,18 +21,15 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
-import { getAuth } from "firebase/auth";
-import { serverTimestamp } from "firebase/firestore";
 import { flatMap, reverse, sortBy } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import CreateGroupModal from "../components/CreateGroupModal";
 import EditGroupModal from "../components/EditGroupModal";
-import useCollection, { getData } from "../hooks/useCollection";
+import { useAuth } from "../providers/AuthProvider";
 import { useLoader } from "../providers/Loader";
 import { useUsers } from "../providers/UsersProvider";
-import type { TGroup, TMatch, TUser } from "../types";
-import { addCollectionItem } from "../utils/addCollectionItem";
-import { updateItem } from "../utils/updateItem";
+import type { TGroup, TGroupMember, TMatch, TUser } from "../types";
+import { supabase } from "../utils/supabase";
 
 export const colors = [
   "#1976d2", // primary.main (blue)
@@ -44,8 +49,8 @@ export default function GroupsPage() {
   const [createGroup, setCreateGroup] = useState(false);
   const { users: players } = useUsers();
   const [groups, setGroups] = useState<TGroup[]>([]);
-  const auth = getAuth();
-  const player = players.find((p) => p.id === auth.currentUser?.uid);
+  const { user } = useAuth();
+  const player = players.find((p) => p.id === user?.id);
   const [showOnlyMine, setShowOnlyMine] = useState(true);
   const { setLoading } = useLoader();
 
@@ -53,50 +58,49 @@ export default function GroupsPage() {
     if (player && player.is_viewer) {
       setShowOnlyMine(false);
     }
-  }, [auth.currentUser, players]);
+  }, [user?.id, players]);
 
   const initialize = async () => {
     setLoading(true);
-    let items: TMatch[] = [];
 
-    for (const group of data) {
-      const matches = await getData<TMatch>(`groups/${group.id}/matches`);
-      items = items.concat(...matches);
+    const { data } = await supabase.from("group").select("*, members:group_member (*, user:user_id (*))");
+
+    if (data) {
+      let items: TMatch[] = [];
+
+      const mappedGroups = (data as TGroup[]).map((group) => {
+        return {
+          ...group,
+          members: group.members.map((member) => {
+            return {
+              ...member,
+              points_in_group:
+                items.filter((match) => match.winner_id === member.user_id).length *
+                3,
+            };
+          }),
+        };
+      });
+      setGroups(
+        showOnlyMine
+          ? mappedGroups.filter((g) =>
+              g.members.map(t => t.id).includes(user?.id as string)
+            )
+          : mappedGroups
+      );
     }
 
-    const mappedGroups = data.map((group) => {
-      return {
-        ...group,
-        members: group.members.map((member) => {
-          const player = players.find((p) => p.id === member.id);
-          return {
-            ...member,
-            ...player,
-            pointsInGroup:
-              items.filter((match) => match.winner_id === player?.id).length *
-              3,
-          };
-        }),
-      };
-    });
-    setGroups(
-      showOnlyMine
-        ? mappedGroups.filter((g) =>
-            g.member_ids.includes(auth.currentUser?.uid as string)
-          )
-        : mappedGroups
-    );
     setLoading(false);
   };
 
   useEffect(() => {
     initialize();
-  }, [data, players, showOnlyMine]);
+  }, [showOnlyMine]);
 
   const availableMembers = useMemo(() => {
     const members = flatMap(groups.map((t) => t.members));
     return players.filter((p) => !members.some((m) => m.id === p.id));
-  }, [players, groups]);
+  }, [groups, players]);
 
   const handleMenuClick = (
     event: React.MouseEvent<HTMLElement>,
@@ -114,32 +118,30 @@ export default function GroupsPage() {
     setSelectedGroup(null);
   };
 
-  const onGroupCreate = async (groupName: string, members: TUser[]) => {
-    const memberIds = members.map((t) => t.id);
-    await addCollectionItem<TGroup>("groups", {
-      name: groupName,
-      members: memberIds.map((id) => ({
-        id,
-      })),
-      color: colors[groups.length ? groups.length - 1 : 0],
-      memberIds,
-      createdAt: serverTimestamp(),
-    } as TGroup);
-    await refresh();
+  const onGroupCreate = async (groupName: string, members: TGroupMember[]) => {
+    const { data } = await supabase
+      .from("group")
+      .insert({
+        name: groupName,
+      })
+      .select("*");
+
+    if (data) {
+      const group = data[0];
+      for (const member of members) {
+        await supabase.from("group_member").insert({
+          group_id: group.id,
+          member_id: member.user_id,
+          is_deleted: false
+        });
+      }
+    }
+    await initialize()
   };
 
   const onGroupEdit = async (groupName: string, members: TUser[]) => {
     if (!selectedGroup?.id) return;
     const memberIds = members.map((t) => t.id);
-    await updateItem<TGroup>("groups", selectedGroup?.id, {
-      name: groupName,
-      members: memberIds.map((id) => ({
-        id,
-      })),
-      memberIds,
-      createdAt: serverTimestamp(),
-    } as TGroup);
-    await refresh();
   };
 
   // const createSchedule = async () => {
@@ -190,7 +192,7 @@ export default function GroupsPage() {
         >
           {showOnlyMine ? "Prikaži sve grupe" : "Prikaži samo moju grupu"}
         </Button>
-        {/* <Box sx={{ mb: 2 }}>
+        <Box sx={{ mb: 2 }}>
           <Button
             variant="contained"
             onClick={() => setCreateGroup(true)}
@@ -198,15 +200,16 @@ export default function GroupsPage() {
           >
             Kreiraj grupu
           </Button>
-          <Button
+
+          {/* <Button
             variant="outlined"
             sx={{ ml: 2 }}
             onClick={() => createSchedule()}
             startIcon={<Schedule />}
           >
             Generiraj raspored
-          </Button>
-        </Box> */}
+          </Button> */}
+        </Box>
         <div className="flex flex-wrap gap-4">
           {sortBy(groups, "name").map((group) => (
             <Card
@@ -259,16 +262,16 @@ export default function GroupsPage() {
                           >
                             <p className="mx-2 font-semibold">{index + 1}.</p>
                             <Avatar className="w-8 h-8 text-sm bg-blue-500">
-                              {member.avatar}
+                              {member.user.avatar}
                             </Avatar>
                             <div className="min-w-0 flex-1 flex justify-between mx-2">
                               <Typography
                                 variant="body2"
                                 className="font-medium text-gray-800 truncate"
                               >
-                                {member.first_name}
+                                {member.user.first_name}
                                 &nbsp;
-                                {member.last_name}
+                                {member.user.last_name}
                               </Typography>
                               <Typography
                                 variant="body2"

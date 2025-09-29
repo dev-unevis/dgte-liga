@@ -113,7 +113,7 @@ export default function CreateGroupModal({
               sx={{ flex: 1 }}
               options={filteredAvailableMembers}
               getOptionLabel={(option) =>
-                `${option.firstName} ${option.lastName}`
+                `${option.first_name} ${option.last_name}`
               }
               value={selectedMembers}
               onChange={(_, newValue) =>
@@ -134,7 +134,7 @@ export default function CreateGroupModal({
                   >
                     {option.avatar}
                   </Avatar>
-                  <p>{`${option.firstName} ${option.lastName}`}</p>
+                  <p>{`${option.first_name} ${option.last_name}`}</p>
                 </Box>
               )}
               noOptionsText="Nema dostupnih članova"
@@ -186,7 +186,7 @@ export default function CreateGroupModal({
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
-                    primary={`${member.firstName} ${member.lastName}`}
+                    primary={`${member.first_name} ${member.last_name}`}
                     secondary={`Poredak - ${index + 1}`}
                   />
                   <ListItemSecondaryAction>

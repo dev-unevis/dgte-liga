@@ -14,6 +14,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { supabase } from "../utils/supabase";
 import type { TUser } from "../types";
+import { normalizeCroatianChars } from "./Register";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -48,15 +49,17 @@ export default function Login() {
       setError("Korisničko ime netočno, molim vas pokušajte opet.");
       return;
     }
-    console.log(user);
+
     const email = user.email;
     const password = username + "123";
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: normalizeCroatianChars(email),
       password,
     });
 
-    setError(error?.message as string);
+    if (error) {
+      setError("Korisničko ime netočno, molim vas pokušajte opet.");
+    }
     setLoading(false);
   };
 

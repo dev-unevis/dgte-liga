@@ -41,8 +41,10 @@ export type TStatus = "waiting" | "played" | "surrendered";
  */
 export type TGroupMember = {
   id: string;
+  user_id: string;
   points_in_group?: number;
-} & TUser;
+  user: TUser;
+};
 
 /**
  * Defines the structure for a Group.

@@ -22,6 +22,7 @@ import "dayjs/locale/hr";
 import { Rankings } from "./pages/Rankings.tsx";
 import { Loader } from "./providers/Loader.tsx";
 import Home from "./pages/Home.tsx";
+import { AuthProvider } from "./providers/AuthProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -35,25 +36,27 @@ createRoot(document.getElementById("root")!).render(
       >
         <BrowserRouter>
           <UsersProvider>
-            <ThemeProvider theme={theme}>
-              <CssBaseline />
-              <WithAuth>
-                <Sidebar />
-              </WithAuth>
-              <Layout>
-                <Routes>
-                  <Route path="login" element={<Login />} />
-                  <Route path="register" element={<Register />} />
-                  <Route path="players" element={<Players />} />
-                  <Route path="groups" element={<Groups />} />
-                  <Route path="matches" element={<Matches />} />
-                  <Route path="profile" element={<ProfilePage />} />
-                  <Route path="rankings" element={<Rankings />} />
-                  <Route path="/" element={<Home />} />
-                 </Routes>
-              </Layout>
-              <Redirect />
-            </ThemeProvider>
+            <AuthProvider>
+              <ThemeProvider theme={theme}>
+                <CssBaseline />
+                <WithAuth>
+                  <Sidebar />
+                </WithAuth>
+                <Layout>
+                  <Routes>
+                    <Route path="login" element={<Login />} />
+                    <Route path="register" element={<Register />} />
+                    <Route path="players" element={<Players />} />
+                    <Route path="groups" element={<Groups />} />
+                    <Route path="matches" element={<Matches />} />
+                    <Route path="profile" element={<ProfilePage />} />
+                    <Route path="rankings" element={<Rankings />} />
+                    <Route path="/" element={<Home />} />
+                  </Routes>
+                </Layout>
+                <Redirect />
+              </ThemeProvider>
+            </AuthProvider>
           </UsersProvider>
         </BrowserRouter>
       </LocalizationProvider>
