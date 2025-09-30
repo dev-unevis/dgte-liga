@@ -4,23 +4,23 @@ export interface EditGroupModalProps {
   open: boolean;
   onClose: () => void;
   name: string;
-  currentMembers: Member[];
+  currentMembers: TGroupMember[];
   availableMembers: TUser[];
-  onSave: (groupName: string, members: Member[]) => Promise<void>;
+  onSave: (groupName: string, members: TGroupMember[]) => Promise<void>;
 }
 
 export interface CreateGroupModalProps {
   open: boolean;
   onClose: () => void;
   availableMembers: TUser[];
-  onSave: (groupName: string, members: Member[]) => Promise<void>;
+  onSave: (groupName: string, members: TGroupMember[]) => Promise<void>;
 }
 
 /**
  * Defines the core structure for a User profile.
  */
 export type TUser = {
-  id: string;
+  user_id: string;
   first_name: string;
   last_name: string;
   avatar: string;
@@ -40,7 +40,6 @@ export type TStatus = "waiting" | "played" | "surrendered";
  * Defines the structure for a Group member with group-specific data.
  */
 export type TGroupMember = {
-  id: string;
   user_id: string;
   points_in_group?: number;
   user: TUser;
@@ -56,6 +55,7 @@ export type TGroup = {
   members: Array<TGroupMember>;
   created_at: Timestamp;
   color: string;
+  is_deleted: boolean;
 };
 
 /**
@@ -75,7 +75,8 @@ export type TMatch = {
   player_one_id: string;
   player_two_id: string;
   sets: TSet[];
-  winner_id: string;
+  winner_id: string | null;
   status: TStatus;
   group_id: string;
+  is_surrender: boolean;
 };

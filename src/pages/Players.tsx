@@ -16,14 +16,21 @@ import {
   TableRow,
   TextField,
   Typography,
+  Alert,
 } from "@mui/material";
 import { sortBy } from "lodash-es";
 import { useState } from "react";
 import { useUsers } from "../providers/UsersProvider";
+import { useAuth } from "../providers/AuthProvider";
+import { supabase } from "../utils/supabase";
 
 export default function Players() {
   const [searchTerm, setSearchTerm] = useState("");
-  const { users: players } = useUsers();
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { users: players, refresh } = useUsers();
+  const { user: authUser } = useAuth();
 
   const filteredPlayers = players.filter(
     (player) =>
@@ -33,6 +40,35 @@ export default function Players() {
       player.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       player.phone.includes(searchTerm)
   );
+
+  const handleDeletePlayer = async (playerId: string, playerName: string) => {
+    if (!confirm(`Jeste li sigurni da želite obrisati igrača ${playerName}?`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+      setSuccess("");
+
+      const { error } = await supabase
+        .from("user")
+        .update({ is_deleted: true })
+        .eq("user_id", playerId);
+
+      if (error) {
+        throw error;
+      }
+
+      setSuccess(`Igrač ${playerName} je uspješno obrisan!`);
+      refresh(); // Refresh the users list
+    } catch (error: any) {
+      console.error("Error deleting player:", error);
+      setError(error.message || "Greška pri brisanju igrača");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Container maxWidth="lg">
@@ -50,6 +86,18 @@ export default function Players() {
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
           Lista registriranih igrača
         </Typography>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {success}
+          </Alert>
+        )}
 
         <TextField
           fullWidth
@@ -95,7 +143,7 @@ export default function Players() {
               .map((player) => {
                 return (
                   <TableRow
-                    key={player.id}
+                    key={player.user_id}
                     sx={{
                       "&:hover": { backgroundColor: "action.hover" },
                       "&:nth-of-type(odd)": {
@@ -145,9 +193,21 @@ export default function Players() {
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: "flex", gap: 1 }}>
-                        <IconButton size="small" color="error">
-                          <Delete fontSize="small" />
-                        </IconButton>
+                        {player.user_id !== authUser?.id && (
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() =>
+                              handleDeletePlayer(
+                                player.user_id,
+                                `${player.first_name} ${player.last_name}`
+                              )
+                            }
+                            disabled={loading}
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        )}
                       </Box>
                     </TableCell>
                   </TableRow>

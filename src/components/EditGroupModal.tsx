@@ -37,26 +37,35 @@ export default function EditGroupModal({
   const [selectedMembers, setSelectedMembers] = useState<TUser[]>([]);
 
   const handleAddMembers = () => {
-    const newMembers = selectedMembers.filter(
-      (sm) => !members.some((m) => m.id === sm.id)
-    );
-    if (newMembers.length > 0) {
-      setMembers([...members, ...newMembers]);
-      setSelectedMembers([]); // reset selection
+    const toAdd = selectedMembers
+      .filter(
+        (selectedUser) =>
+          !members.some((m) => m.user_id === selectedUser.user_id)
+      )
+      .map(
+        (selectedUser): TGroupMember => ({
+          user_id: selectedUser.user_id,
+          user: selectedUser,
+        })
+      );
+
+    if (toAdd.length > 0) {
+      setMembers([...members, ...toAdd]);
+      setSelectedMembers([]);
     }
   };
 
   // Filter available members to exclude those already in the group
   const filteredAvailableMembers = availableMembers.filter(
-    (member) => !members.some((m) => m.id === member.id)
+    (member) => !members.some((m) => m.user_id === member.user_id)
   );
 
-  const handleRemoveMember = (memberId: string) => {
-    setMembers(members.filter((m) => m.id !== memberId));
+  const handleRemoveMember = (memberUserId: string) => {
+    setMembers((prev) => prev.filter((m) => m.user_id !== memberUserId));
   };
 
-  const handleSave = () => {
-    onSave(groupName, members);
+  const handleSave = async () => {
+    await onSave(groupName, members);
     onClose();
   };
 
@@ -111,6 +120,7 @@ export default function EditGroupModal({
           <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
             <Autocomplete
               multiple
+              disableCloseOnSelect
               sx={{ flex: 1 }}
               options={filteredAvailableMembers}
               getOptionLabel={(option) =>
@@ -180,7 +190,10 @@ export default function EditGroupModal({
               }}
             >
               {members.map((member, index) => (
-                <ListItem key={member.id} divider={index < members.length - 1}>
+                <ListItem
+                  key={member.user_id}
+                  divider={index < members.length - 1}
+                >
                   <ListItemAvatar>
                     <Avatar sx={{ bgcolor: "primary.main" }}>
                       {member.user.avatar}
@@ -193,7 +206,7 @@ export default function EditGroupModal({
                   <ListItemSecondaryAction>
                     <IconButton
                       edge="end"
-                      onClick={() => handleRemoveMember(member.id)}
+                      onClick={() => handleRemoveMember(member.user_id)}
                       color="error"
                       size="small"
                     >

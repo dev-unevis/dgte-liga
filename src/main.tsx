@@ -15,7 +15,7 @@ import Login from "./pages/Login.tsx";
 import Matches from "./pages/Matches.tsx";
 import Players from "./pages/Players.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
-import Register from "./pages/Register.tsx";
+import AddPlayer from "./pages/AddPlayer.tsx";
 import { UsersProvider } from "./providers/UsersProvider.tsx";
 import theme from "./theme.ts";
 import "dayjs/locale/hr";
@@ -23,6 +23,8 @@ import { Rankings } from "./pages/Rankings.tsx";
 import { Loader } from "./providers/Loader.tsx";
 import Home from "./pages/Home.tsx";
 import { AuthProvider } from "./providers/AuthProvider.tsx";
+import Rules from "./pages/Rules.tsx";
+import Payment from "./pages/Payment.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -45,12 +47,14 @@ createRoot(document.getElementById("root")!).render(
                 <Layout>
                   <Routes>
                     <Route path="login" element={<Login />} />
-                    <Route path="register" element={<Register />} />
+                    <Route path="add-player" element={<AddPlayer />} />
                     <Route path="players" element={<Players />} />
                     <Route path="groups" element={<Groups />} />
                     <Route path="matches" element={<Matches />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="rankings" element={<Rankings />} />
+                    <Route path="rules" element={<Rules />} />
+                    <Route path="payment" element={<Payment />} />
                     <Route path="/" element={<Home />} />
                   </Routes>
                 </Layout>

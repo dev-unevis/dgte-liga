@@ -22,7 +22,10 @@ const UsersProvider = ({ children }: { children: ReactNode }) => {
   const [data, setData] = useState<TUser[]>([]);
 
   const getUsers = async () => {
-    const response = await supabase.from("user").select("*");
+    const response = await supabase
+      .from("user")
+      .select("*")
+      .eq("is_deleted", false);
     if (response.data) setData(response.data);
   };
 

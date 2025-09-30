@@ -6,7 +6,10 @@ import {
   Logout,
   Menu,
   Person,
+  PersonAdd,
   Schedule,
+  Rule,
+  Payment,
 } from "@mui/icons-material";
 import {
   AppBar,
@@ -33,9 +36,12 @@ const drawerWidth = 240;
 const menuItems = [
   { text: "Početna", icon: <Home />, path: "/" },
   { text: "Igrači", icon: <Person />, path: "/players" },
+  { text: "Dodaj igrača", icon: <PersonAdd />, path: "/add-player" },
   { text: "Grupe", icon: <Group />, path: "/groups" },
   { text: "Raspored", icon: <Schedule />, path: "/matches" },
   { text: "Rang lista", icon: <Leaderboard />, path: "/rankings" },
+  { text: "Pravila", icon: <Rule />, path: "/rules" },
+  { text: "Uplate", icon: <Payment />, path: "/payment" },
   { text: "Profil", icon: <AccountCircle />, path: "/profile" },
 ];
 

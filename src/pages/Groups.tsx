@@ -28,7 +28,7 @@ import EditGroupModal from "../components/EditGroupModal";
 import { useAuth } from "../providers/AuthProvider";
 import { useLoader } from "../providers/Loader";
 import { useUsers } from "../providers/UsersProvider";
-import type { TGroup, TGroupMember, TMatch, TUser } from "../types";
+import type { TGroup, TGroupMember, TMatch } from "../types";
 import { supabase } from "../utils/supabase";
 
 export const colors = [
@@ -50,7 +50,7 @@ export default function GroupsPage() {
   const { users: players } = useUsers();
   const [groups, setGroups] = useState<TGroup[]>([]);
   const { user } = useAuth();
-  const player = players.find((p) => p.id === user?.id);
+  const player = players.find((p) => p.user_id === user?.id);
   const [showOnlyMine, setShowOnlyMine] = useState(true);
   const { setLoading } = useLoader();
 
@@ -63,7 +63,19 @@ export default function GroupsPage() {
   const initialize = async () => {
     setLoading(true);
 
-    const { data } = await supabase.from("group").select("*, members:group_member (*, user:user_id (*))");
+    const { data } = await supabase
+      .from("group")
+      .select(
+        `
+      *,
+      members:group_member (
+        *,
+        user:user_id (*)
+      )
+    `
+      )
+      .eq("is_deleted", false) // Filter groups where is_deleted is false
+      .eq("members.is_deleted", false); // Filter members where is_deleted is false
 
     if (data) {
       let items: TMatch[] = [];
@@ -75,8 +87,8 @@ export default function GroupsPage() {
             return {
               ...member,
               points_in_group:
-                items.filter((match) => match.winner_id === member.user_id).length *
-                3,
+                items.filter((match) => match.winner_id === member.user_id)
+                  .length * 3,
             };
           }),
         };
@@ -84,7 +96,7 @@ export default function GroupsPage() {
       setGroups(
         showOnlyMine
           ? mappedGroups.filter((g) =>
-              g.members.map(t => t.id).includes(user?.id as string)
+              g.members.map((t) => t.user_id).includes(user?.id as string)
             )
           : mappedGroups
       );
@@ -99,7 +111,7 @@ export default function GroupsPage() {
 
   const availableMembers = useMemo(() => {
     const members = flatMap(groups.map((t) => t.members));
-    return players.filter((p) => !members.some((m) => m.id === p.id));
+    return players.filter((p) => !members.some((m) => m.user_id === p.user_id));
   }, [groups, players]);
 
   const handleMenuClick = (
@@ -118,11 +130,23 @@ export default function GroupsPage() {
     setSelectedGroup(null);
   };
 
+  const onGroupDelete = async () => {
+    if (!selectedGroup?.id) return;
+    await supabase
+      .from("group")
+      .update({ is_deleted: true })
+      .eq("id", selectedGroup.id);
+    handleMenuClose();
+    await initialize();
+  };
+
   const onGroupCreate = async (groupName: string, members: TGroupMember[]) => {
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
     const { data } = await supabase
       .from("group")
       .insert({
         name: groupName,
+        color: randomColor,
       })
       .select("*");
 
@@ -131,35 +155,76 @@ export default function GroupsPage() {
       for (const member of members) {
         await supabase.from("group_member").insert({
           group_id: group.id,
-          member_id: member.user_id,
-          is_deleted: false
+          user_id: member.user_id,
+          is_deleted: false,
         });
       }
     }
-    await initialize()
+    await initialize();
   };
 
-  const onGroupEdit = async (groupName: string, members: TUser[]) => {
+  const onGroupEdit = async (groupName: string, members: TGroupMember[]) => {
     if (!selectedGroup?.id) return;
-    const memberIds = members.map((t) => t.id);
+
+    await supabase
+      .from("group")
+      .update({ name: groupName })
+      .eq("id", selectedGroup.id);
+
+    const currentMemberIds = (selectedGroup.members || []).map(
+      (m) => m.user_id
+    );
+    const nextMemberIds = members.map((m) => m.user_id);
+
+    const toRemove = currentMemberIds.filter(
+      (id) => !nextMemberIds.includes(id)
+    );
+    const toAdd = nextMemberIds.filter((id) => !currentMemberIds.includes(id));
+
+    if (toRemove.length > 0) {
+      await supabase
+        .from("group_member")
+        .update({ is_deleted: true })
+        .eq("group_id", selectedGroup.id)
+        .in("user_id", toRemove);
+    }
+
+    if (toAdd.length > 0) {
+      const { data: existing } = await supabase
+        .from("group_member")
+        .select("user_id, is_deleted")
+        .eq("group_id", selectedGroup.id)
+        .in("user_id", toAdd);
+
+      const existingIds = (existing || []).map(
+        (e: { user_id: string }) => e.user_id
+      );
+      const needUndelete = toAdd.filter((id) => existingIds.includes(id));
+      const needInsert = toAdd.filter((id) => !existingIds.includes(id));
+
+      if (needUndelete.length > 0) {
+        await supabase
+          .from("group_member")
+          .update({ is_deleted: false })
+          .eq("group_id", selectedGroup.id)
+          .in("user_id", needUndelete);
+      }
+
+      if (needInsert.length > 0) {
+        const rows = needInsert.map((id) => ({
+          group_id: selectedGroup.id,
+          user_id: id,
+          is_deleted: false,
+        }));
+        await supabase.from("group_member").insert(rows);
+      }
+    }
+
+    await initialize();
   };
 
   // const createSchedule = async () => {
   //   const matches = await generateSchedule();
-  //   for (const match of matches) {
-  //     const doc = await addCollectionItem(
-  //       `groups/${match.groupId}/matches`,
-  //       match
-  //     );
-  //     await setCollectionItem(
-  //       `users/${match.playerOneId}/matches/${doc.id}`,
-  //       match
-  //     );
-  //     await setCollectionItem(
-  //       `users/${match.playerTwoId}/matches/${doc.id}`,
-  //       match
-  //     );
-  //   }
   // };
 
   return (
@@ -201,14 +266,7 @@ export default function GroupsPage() {
             Kreiraj grupu
           </Button>
 
-          {/* <Button
-            variant="outlined"
-            sx={{ ml: 2 }}
-            onClick={() => createSchedule()}
-            startIcon={<Schedule />}
-          >
-            Generiraj raspored
-          </Button> */}
+          {/* Schedule generation button can be wired to call generateSchedule and insert rows */}
         </Box>
         <div className="flex flex-wrap gap-4">
           {sortBy(groups, "name").map((group) => (
@@ -257,7 +315,7 @@ export default function GroupsPage() {
                       {reverse(sortBy(group.members, "pointsInGroup")).map(
                         (member, index) => (
                           <div
-                            key={member.id}
+                            key={member.user.user_id}
                             className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                           >
                             <p className="mx-2 font-semibold">{index + 1}.</p>
@@ -303,7 +361,7 @@ export default function GroupsPage() {
             <ListItemText primary="Uredi grupu" />
           </MenuItem>
 
-          <MenuItem disabled onClick={handleMenuClose}>
+          <MenuItem onClick={onGroupDelete}>
             <ListItemIcon>
               <Delete fontSize="small" className="text-red-600" />
             </ListItemIcon>
@@ -315,7 +373,7 @@ export default function GroupsPage() {
         <EditGroupModal
           onClose={() => setIsOpen(false)}
           open={open}
-          currentMembers={selectedGroup.members}
+          currentMembers={[...selectedGroup.members]}
           name={selectedGroup.name}
           availableMembers={availableMembers}
           onSave={onGroupEdit}
