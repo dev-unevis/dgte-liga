@@ -57,7 +57,7 @@ export default function AddPlayer() {
       // Create user in Supabase Auth
       const { data, error: authError } = await supabase.auth.signUp({
         email: normalizeCroatianChars(email),
-        password: normalizeCroatianChars(password),
+        password: password,
         options: {
           emailRedirectTo: undefined, // Disable automatic login
         },
