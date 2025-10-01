@@ -14,6 +14,7 @@ import type React from "react";
 import { useState } from "react";
 import { supabase } from "../utils/supabase";
 import { normalizeCroatianChars } from "./ProfilePage";
+import { useUsers } from "../providers/UsersProvider";
 
 export default function AddPlayer() {
   const [formData, setFormData] = useState({
@@ -24,6 +25,7 @@ export default function AddPlayer() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const { refresh } = useUsers();
 
   const handleInputChange =
     (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +37,7 @@ export default function AddPlayer() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    e.stopPropagation();
     try {
       setLoading(true);
       setError("");
@@ -92,6 +94,7 @@ export default function AddPlayer() {
           lastName: "",
           phoneNumber: "",
         });
+        await refresh();
       }
     } catch (error: any) {
       console.error("Error adding player:", error);

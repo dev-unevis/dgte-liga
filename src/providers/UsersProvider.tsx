@@ -25,7 +25,7 @@ const UsersProvider = ({ children }: { children: ReactNode }) => {
     const response = await supabase
       .from("user")
       .select("*")
-      .eq("is_deleted", false);
+      .eq("is_deleted", false).order("last_name");
     if (response.data) setData(response.data);
   };
 
