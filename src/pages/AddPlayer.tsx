@@ -15,6 +15,7 @@ import { useState } from "react";
 import { supabase } from "../utils/supabase";
 import { normalizeCroatianChars } from "./ProfilePage";
 import { useUsers } from "../providers/UsersProvider";
+import { useAuth } from "../providers/AuthProvider";
 
 export default function AddPlayer() {
   const [formData, setFormData] = useState({
@@ -25,7 +26,9 @@ export default function AddPlayer() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const { refresh } = useUsers();
+  const { refresh, users } = useUsers();
+  const { user } = useAuth();
+  const currentUser = users.find((u) => u.user_id === user?.id);
 
   const handleInputChange =
     (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,6 +106,8 @@ export default function AddPlayer() {
       setLoading(false);
     }
   };
+
+  if (!currentUser?.is_admin) return null;
 
   return (
     <Container component="main" maxWidth="sm">

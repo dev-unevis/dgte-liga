@@ -51,6 +51,7 @@ export default function GroupsPage() {
   const [groups, setGroups] = useState<TGroup[]>([]);
   const { user } = useAuth();
   const player = players.find((p) => p.user_id === user?.id);
+  const isAdmin = !!player?.is_admin;
   const [showOnlyMine, setShowOnlyMine] = useState(true);
   const { setLoading } = useLoader();
 
@@ -257,17 +258,17 @@ export default function GroupsPage() {
         >
           {showOnlyMine ? "Prikaži sve grupe" : "Prikaži samo moju grupu"}
         </Button>
-        <Box sx={{ mb: 2 }}>
-          <Button
-            variant="contained"
-            onClick={() => setCreateGroup(true)}
-            startIcon={<Create />}
-          >
-            Kreiraj grupu
-          </Button>
-
-          {/* Schedule generation button can be wired to call generateSchedule and insert rows */}
-        </Box>
+        {isAdmin && (
+          <Box sx={{ mb: 2 }}>
+            <Button
+              variant="contained"
+              onClick={() => setCreateGroup(true)}
+              startIcon={<Create />}
+            >
+              Kreiraj grupu
+            </Button>
+          </Box>
+        )}
         <div className="flex flex-wrap gap-4">
           {sortBy(groups, "name").map((group) => (
             <Card
@@ -293,13 +294,15 @@ export default function GroupsPage() {
                       {group.members.length} člana
                     </Typography>
                   </div>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => handleMenuClick(e, group.id!)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <MoreVert />
-                  </IconButton>
+                  {isAdmin && (
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleMenuClick(e, group.id!)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <MoreVert />
+                    </IconButton>
+                  )}
                 </div>
 
                 {group.members && (
@@ -348,26 +351,28 @@ export default function GroupsPage() {
             </Card>
           ))}
         </div>
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-          className="mt-2"
-        >
-          <MenuItem onClick={() => setIsOpen(true)}>
-            <ListItemIcon>
-              <Edit fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary="Uredi grupu" />
-          </MenuItem>
+        {isAdmin && (
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+            className="mt-2"
+          >
+            <MenuItem onClick={() => setIsOpen(true)}>
+              <ListItemIcon>
+                <Edit fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Uredi grupu" />
+            </MenuItem>
 
-          <MenuItem onClick={onGroupDelete}>
-            <ListItemIcon>
-              <Delete fontSize="small" className="text-red-600" />
-            </ListItemIcon>
-            <ListItemText primary="Obriši grupu" className="text-red-600" />
-          </MenuItem>
-        </Menu>
+            <MenuItem onClick={onGroupDelete}>
+              <ListItemIcon>
+                <Delete fontSize="small" className="text-red-600" />
+              </ListItemIcon>
+              <ListItemText primary="Obriši grupu" className="text-red-600" />
+            </MenuItem>
+          </Menu>
+        )}
       </Container>
       {selectedGroup && open && (
         <EditGroupModal

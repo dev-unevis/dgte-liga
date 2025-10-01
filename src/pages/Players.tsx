@@ -31,6 +31,7 @@ export default function Players() {
   const [loading, setLoading] = useState(false);
   const { users: players, refresh } = useUsers();
   const { user: authUser } = useAuth();
+  const me = players.find((p) => p.user_id === authUser?.id);
 
   const filteredPlayers = players.filter(
     (player) =>
@@ -193,7 +194,7 @@ export default function Players() {
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: "flex", gap: 1 }}>
-                        {player.user_id !== authUser?.id && (
+                        {me?.is_admin && player.user_id !== authUser?.id && (
                           <IconButton
                             size="small"
                             color="error"

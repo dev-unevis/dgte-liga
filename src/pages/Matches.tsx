@@ -48,6 +48,7 @@ export default function Matches() {
   // Modal styling no longer needs theme hook here
   const { user } = useAuth();
   const player = players.find((p) => p.user_id === user?.id);
+  const isAdmin = !!player?.is_admin;
   const [showOnlyMine, setShowOnlyMine] = useState(true);
   const { setLoading } = useLoader();
 
@@ -171,25 +172,27 @@ export default function Matches() {
       >
         {showOnlyMine ? "Prikaži sve mečeve" : "Prikaži samo moje mečeve"}
       </Button>
-      <Button
-        sx={{ mb: 2, ml: 2 }}
-        variant="outlined"
-        startIcon={<SaveIcon />}
-        onClick={async () => {
-          const matches = await generateSchedule();
-          if (matches.length) {
-            await supabase.from("match").insert(matches);
-            await initialize();
-            setSnackbar({
-              open: true,
-              message: "Raspored generiran.",
-              severity: "success",
-            });
-          }
-        }}
-      >
-        Generiraj raspored
-      </Button>
+      {isAdmin && (
+        <Button
+          sx={{ mb: 2, ml: 2 }}
+          variant="outlined"
+          startIcon={<SaveIcon />}
+          onClick={async () => {
+            const matches = await generateSchedule();
+            if (matches.length) {
+              await supabase.from("match").insert(matches);
+              await initialize();
+              setSnackbar({
+                open: true,
+                message: "Raspored generiran.",
+                severity: "success",
+              });
+            }
+          }}
+        >
+          Generiraj raspored
+        </Button>
+      )}
       <TableContainer component={Paper} variant="outlined">
         <Table>
           <TableHead>
