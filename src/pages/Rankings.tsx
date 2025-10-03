@@ -10,7 +10,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { reverse, sortBy, sum } from "lodash-es";
+import { orderBy, reverse, sortBy, sum } from "lodash-es";
 import { useEffect, useState } from "react";
 import { useLoader } from "../providers/Loader";
 import { useUsers } from "../providers/UsersProvider";
@@ -40,8 +40,6 @@ export const Rankings = () => {
     const allMatches = (matchesData || []) as TMatch[];
 
     for (const user of users) {
-      if (user.is_admin) continue;
-
       const userMatches = allMatches.filter(
         (m) =>
           m.player_one_id === user.user_id || m.player_two_id === user.user_id
@@ -79,7 +77,7 @@ export const Rankings = () => {
       items.push(item);
     }
 
-    setRankings(items);
+    setRankings(orderBy(items, "totalPoints", "desc"));
     setLoading(false);
   };
 

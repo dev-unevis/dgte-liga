@@ -56,6 +56,7 @@ export type TGroup = {
   created_at: Timestamp;
   color: string;
   is_deleted: boolean;
+  match: Array<TMatch>;
 };
 
 /**
@@ -79,4 +80,6 @@ export type TMatch = {
   status: TStatus;
   group_id: string;
   is_surrender: boolean;
+  is_deleted: boolean;
+  created_at?: Timestamp;
 };

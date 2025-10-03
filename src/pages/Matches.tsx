@@ -1,4 +1,5 @@
 import {
+  Delete as DeleteIcon,
   Edit as EditIcon,
   Save as SaveIcon,
   Schedule,
@@ -10,6 +11,11 @@ import {
   Button,
   Chip,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Paper,
   Snackbar,
   Table,
@@ -20,7 +26,11 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useEffect, useState } from "react";
+import dayjs, { Dayjs } from "dayjs";
 import { useAuth } from "../providers/AuthProvider";
 import { useLoader } from "../providers/Loader";
 import { useUsers } from "../providers/UsersProvider";
@@ -28,6 +38,7 @@ import type { TGroup, TMatch, TUser } from "../types";
 import { supabase } from "../utils/supabase";
 import { generateSchedule } from "../utils/generateSchedule";
 import { EditMatchModal } from "../components/EditMatchModal";
+import { orderBy } from "lodash-es";
 
 type JoinedMatch = TMatch & {
   player_one: TUser;
@@ -50,6 +61,10 @@ export default function Matches() {
   const player = players.find((p) => p.user_id === user?.id);
   const isAdmin = !!player?.is_admin;
   const [showOnlyMine, setShowOnlyMine] = useState(true);
+  const [selectedMonth, setSelectedMonth] = useState<Dayjs | null>(dayjs());
+  const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
+  const [deleteSingleDialogOpen, setDeleteSingleDialogOpen] = useState(false);
+  const [matchToDelete, setMatchToDelete] = useState<JoinedMatch | null>(null);
   const { setLoading } = useLoader();
 
   useEffect(() => {
@@ -71,14 +86,32 @@ export default function Matches() {
     );
 
     if (matchesData) {
-      const items = matchesData as JoinedMatch[];
-      setMatches(
-        showOnlyMine
-          ? items.filter((t) =>
-              [t.player_one_id, t.player_two_id].includes(user?.id as string)
-            )
-          : items
-      );
+      const items = orderBy(matchesData, "group.name") as JoinedMatch[];
+      let filteredMatches = showOnlyMine
+        ? items.filter((t) =>
+            [t.player_one_id, t.player_two_id].includes(user?.id as string)
+          )
+        : items;
+
+      // Filter by selected month if a month is selected
+      if (selectedMonth) {
+        const startOfMonth = selectedMonth.startOf("month");
+        const endOfMonth = selectedMonth.endOf("month");
+
+        filteredMatches = filteredMatches.filter((match) => {
+          // Filter by match creation date or any date field in the match
+          const matchDate = match.created_at
+            ? dayjs(match.created_at?.toDate?.() || match.created_at)
+            : dayjs();
+          return (
+            matchDate.isAfter(startOfMonth) && matchDate.isBefore(endOfMonth)
+          );
+        });
+      }
+
+      setMatches(filteredMatches);
+    } else {
+      setMatches([]);
     }
 
     setLoading(false);
@@ -86,7 +119,7 @@ export default function Matches() {
 
   useEffect(() => {
     initialize();
-  }, [showOnlyMine]);
+  }, [showOnlyMine, selectedMonth]);
 
   const getPlayer = (id: string) => players.find((p) => p.user_id === id);
 
@@ -149,6 +182,71 @@ export default function Matches() {
     return winner ? `${winner.first_name} ${winner.last_name}` : "-";
   };
 
+  // Check if selected month is the current month (only enable for current month)
+  const isCurrentMonth = selectedMonth
+    ? selectedMonth.isSame(dayjs(), "month")
+    : false;
+
+  // Delete all matches in current month
+  const handleDeleteAllMatches = async () => {
+    if (!selectedMonth) return;
+
+    const startOfMonth = selectedMonth.startOf("month");
+    const endOfMonth = selectedMonth.endOf("month");
+
+    // Get all matches in the selected month
+    const { data: matchesToDelete } = await supabase
+      .from("match")
+      .select("id")
+      .gte("created_at", startOfMonth.toISOString())
+      .lte("created_at", endOfMonth.toISOString());
+
+    if (matchesToDelete && matchesToDelete.length > 0) {
+      const matchIds = matchesToDelete.map((match) => match.id);
+      await supabase
+        .from("match")
+        .update({ is_deleted: true })
+        .in("id", matchIds);
+
+      setSnackbar({
+        open: true,
+        message: `Obrisano ${matchIds.length} mečeva iz ${selectedMonth.format(
+          "MM/YYYY"
+        )}.`,
+        severity: "success",
+      });
+    }
+
+    setDeleteAllDialogOpen(false);
+    await initialize();
+  };
+
+  // Delete single match
+  const handleDeleteSingleMatch = async () => {
+    if (!matchToDelete?.id) return;
+
+    await supabase
+      .from("match")
+      .update({ is_deleted: true })
+      .eq("id", matchToDelete.id);
+
+    await initialize();
+    setSnackbar({
+      open: true,
+      message: "Meč je obrisan.",
+      severity: "success",
+    });
+
+    setDeleteSingleDialogOpen(false);
+    setMatchToDelete(null);
+  };
+
+  // Open delete single match dialog
+  const handleDeleteMatchClick = (match: JoinedMatch) => {
+    setMatchToDelete(match);
+    setDeleteSingleDialogOpen(true);
+  };
+
   // Derived details now handled inside EditMatchModal
 
   return (
@@ -163,6 +261,17 @@ export default function Matches() {
           Raspored
         </Typography>
       </div>
+      <Box sx={{ mb: 2 }}>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            value={selectedMonth}
+            onChange={(newValue) => setSelectedMonth(newValue)}
+            label="Odaberi mjesec"
+            views={["month", "year"]}
+            format="MM/YYYY"
+          />
+        </LocalizationProvider>
+      </Box>
       <Button
         sx={{
           mb: 2,
@@ -173,25 +282,28 @@ export default function Matches() {
         {showOnlyMine ? "Prikaži sve mečeve" : "Prikaži samo moje mečeve"}
       </Button>
       {isAdmin && (
-        <Button
-          sx={{ mb: 2, ml: 2 }}
-          variant="outlined"
-          startIcon={<SaveIcon />}
-          onClick={async () => {
-            const matches = await generateSchedule();
-            if (matches.length) {
-              await supabase.from("match").insert(matches);
-              await initialize();
-              setSnackbar({
-                open: true,
-                message: "Raspored generiran.",
-                severity: "success",
-              });
-            }
-          }}
-        >
-          Generiraj raspored
-        </Button>
+        <>
+          <Button
+            sx={{ mb: 2, ml: 2 }}
+            variant="outlined"
+            startIcon={<SaveIcon />}
+            disabled={!isCurrentMonth}
+            onClick={async () => {
+              const matches = await generateSchedule();
+              if (matches.length) {
+                await supabase.from("match").insert(matches);
+                await initialize();
+                setSnackbar({
+                  open: true,
+                  message: "Raspored generiran.",
+                  severity: "success",
+                });
+              }
+            }}
+          >
+            Generiraj raspored
+          </Button>
+        </>
       )}
       <TableContainer component={Paper} variant="outlined">
         <Table>
@@ -336,14 +448,27 @@ export default function Matches() {
                     )}
                   </TableCell>
                   <TableCell align="center">
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<EditIcon />}
-                      onClick={() => handleMatchSelect(match)}
-                    >
-                      Uredi
-                    </Button>
+                    <Box display="flex" gap={1} justifyContent="center">
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<EditIcon />}
+                        onClick={() => handleMatchSelect(match)}
+                      >
+                        Uredi
+                      </Button>
+                      {isAdmin && (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color="error"
+                          startIcon={<DeleteIcon />}
+                          onClick={() => handleDeleteMatchClick(match)}
+                        >
+                          Obriši
+                        </Button>
+                      )}
+                    </Box>
                   </TableCell>
                 </TableRow>
               );
@@ -393,6 +518,68 @@ export default function Matches() {
           </Alert>
         </Snackbar>
       )}
+
+      {/* Delete All Matches Confirmation Dialog */}
+      <Dialog
+        open={deleteAllDialogOpen}
+        onClose={() => setDeleteAllDialogOpen(false)}
+        aria-labelledby="delete-all-dialog-title"
+      >
+        <DialogTitle id="delete-all-dialog-title">
+          Potvrdi brisanje svih mečeva
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Jeste li sigurni da želite obrisati sve mečeve iz{" "}
+            {selectedMonth?.format("MM/YYYY")}? Ova akcija se ne može poništiti.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteAllDialogOpen(false)}>
+            Odustani
+          </Button>
+          <Button
+            onClick={handleDeleteAllMatches}
+            color="error"
+            variant="contained"
+          >
+            Obriši sve
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Single Match Confirmation Dialog */}
+      <Dialog
+        open={deleteSingleDialogOpen}
+        onClose={() => setDeleteSingleDialogOpen(false)}
+        aria-labelledby="delete-single-dialog-title"
+      >
+        <DialogTitle id="delete-single-dialog-title">
+          Potvrdi brisanje meča
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Jeste li sigurni da želite obrisati ovaj meč između{" "}
+            {matchToDelete?.player_one?.first_name}{" "}
+            {matchToDelete?.player_one?.last_name} i{" "}
+            {matchToDelete?.player_two?.first_name}{" "}
+            {matchToDelete?.player_two?.last_name}? Ova akcija se ne može
+            poništiti.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteSingleDialogOpen(false)}>
+            Odustani
+          </Button>
+          <Button
+            onClick={handleDeleteSingleMatch}
+            color="error"
+            variant="contained"
+          >
+            Obriši
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

@@ -5,6 +5,7 @@ import {
   Group,
   MoreVert,
   Person,
+  Refresh,
 } from "@mui/icons-material";
 import {
   Avatar,
@@ -21,6 +22,11 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import dayjs, { Dayjs } from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
 import { flatMap, reverse, sortBy } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import CreateGroupModal from "../components/CreateGroupModal";
@@ -28,8 +34,10 @@ import EditGroupModal from "../components/EditGroupModal";
 import { useAuth } from "../providers/AuthProvider";
 import { useLoader } from "../providers/Loader";
 import { useUsers } from "../providers/UsersProvider";
-import type { TGroup, TGroupMember, TMatch } from "../types";
+import type { TGroup, TGroupMember } from "../types";
 import { supabase } from "../utils/supabase";
+
+dayjs.extend(isBetween);
 
 export const colors = [
   "#1976d2", // primary.main (blue)
@@ -53,6 +61,7 @@ export default function GroupsPage() {
   const player = players.find((p) => p.user_id === user?.id);
   const isAdmin = !!player?.is_admin;
   const [showOnlyMine, setShowOnlyMine] = useState(true);
+  const [selectedMonth, setSelectedMonth] = useState<Dayjs | null>(dayjs());
   const { setLoading } = useLoader();
 
   useEffect(() => {
@@ -64,7 +73,7 @@ export default function GroupsPage() {
   const initialize = async () => {
     setLoading(true);
 
-    const { data } = await supabase
+    let query = supabase
       .from("group")
       .select(
         `
@@ -72,35 +81,57 @@ export default function GroupsPage() {
       members:group_member (
         *,
         user:user_id (*)
-      )
+      ),
+      match (*)
     `
       )
       .eq("is_deleted", false) // Filter groups where is_deleted is false
       .eq("members.is_deleted", false); // Filter members where is_deleted is false
 
-    if (data) {
-      let items: TMatch[] = [];
+    // 1. Apply created_at filter based on selectedMonth directly to the query
+    if (selectedMonth) {
+      const startOfMonth = selectedMonth.startOf("month");
+      const endOfMonth = selectedMonth.endOf("month");
 
+      // Filter groups where the 'created_at' date falls within the selected month range.
+      query = query
+        .gte("created_at", startOfMonth.toISOString())
+        .lte("created_at", endOfMonth.toISOString());
+    }
+
+    const { data } = await query;
+
+    // 2. Client-side Processing (Mapping and User Filtering)
+    if (data) {
       const mappedGroups = (data as TGroup[]).map((group) => {
+        // Calculate points for members
         return {
           ...group,
           members: group.members.map((member) => {
             return {
               ...member,
               points_in_group:
-                items.filter((match) => match.winner_id === member.user_id)
-                  .length * 3,
+                group.match.filter(
+                  (match) => match.winner_id === member.user_id
+                ).length * 3,
             };
           }),
         };
       });
-      setGroups(
-        showOnlyMine
-          ? mappedGroups.filter((g) =>
-              g.members.map((t) => t.user_id).includes(user?.id as string)
-            )
-          : mappedGroups
-      );
+
+      let filteredGroups = showOnlyMine
+        ? mappedGroups.filter((g) =>
+            g.members.map((t) => t.user_id).includes(user?.id as string)
+          )
+        : mappedGroups;
+
+      // The previous client-side date filtering logic is now removed/redundant
+      // because the groups are already filtered by created_at in the query.
+      // If you need to filter based on match dates *within* the month as a secondary criteria,
+      // you would need a more complex Supabase function or view, but for simple
+      // group lifecycle filtering, the server-side created_at filter is best.
+
+      setGroups(filteredGroups);
     }
 
     setLoading(false);
@@ -108,7 +139,7 @@ export default function GroupsPage() {
 
   useEffect(() => {
     initialize();
-  }, [showOnlyMine]);
+  }, [showOnlyMine, selectedMonth]);
 
   const availableMembers = useMemo(() => {
     const members = flatMap(groups.map((t) => t.members));
@@ -224,6 +255,196 @@ export default function GroupsPage() {
     await initialize();
   };
 
+  const handleGenerateGroups = async () => {
+    try {
+      setLoading(true);
+
+      const currentMonth = dayjs();
+      const previousMonth = currentMonth.subtract(1, "month");
+      const startOfPrevMonth = previousMonth.startOf("month");
+      const endOfPrevMonth = previousMonth.endOf("month");
+
+      const membersPerGroup = 4;
+
+      // 1. Fetch Previous Groups and Matches
+      const { data: prevGroups } = (await supabase
+        .from("group")
+        .select(
+          `
+        *,
+        members:group_member (
+          *,
+          user:user_id (*)
+        ),
+        match (*)
+      `
+        )
+        .eq("is_deleted", false)
+        .eq("members.is_deleted", false)
+        .gte("created_at", startOfPrevMonth.toISOString())
+        .lte("created_at", endOfPrevMonth.toISOString())) as {
+        data: TGroup[] | null;
+      };
+
+      if (!prevGroups || prevGroups.length === 0) {
+        console.log(
+          "No groups found for previous month:",
+          previousMonth.format("MM/YYYY")
+        );
+        setLoading(false);
+        return;
+      }
+
+      // 2. Calculate Rankings (Points)
+      const groupsWithRankings = prevGroups.map((group) => {
+        const prevMonthMatches = group.match.filter((match: any) => {
+          const matchDate = dayjs(match.created_at);
+          return matchDate.isBetween(
+            startOfPrevMonth,
+            endOfPrevMonth,
+            "day",
+            "[]"
+          );
+        });
+
+        const membersWithPoints = group.members.map((member: any) => ({
+          ...member,
+          points_in_group:
+            prevMonthMatches.filter(
+              (match: any) => match.winner_id === member.user_id
+            ).length * 3,
+        }));
+
+        // Sort members by points (best to worst/descending)
+        const sortedMembers = reverse(
+          sortBy(membersWithPoints, "points_in_group")
+        );
+
+        return {
+          ...group,
+          members: sortedMembers,
+        };
+      });
+
+      // Sort groups by name (Skupina 1, Skupina 2, ...) to establish order (0 is highest)
+      const sortedGroups = sortBy(groupsWithRankings, "name") as (TGroup & {
+        members: TGroupMember[];
+      })[];
+
+      const numberOfGroups = sortedGroups.length;
+      const uniqueGroupNames = [
+        ...new Set(sortedGroups.map((group) => group.name)),
+      ].sort();
+
+      const newGroups: any[] = [];
+
+      // 3. CORE LOGIC: Promotion and Relegation
+      for (let i = 0; i < numberOfGroups; i++) {
+        const newGroupMembers: any[] = [];
+        const currentGroup = sortedGroups[i];
+        const currentGroupMembers = currentGroup.members;
+
+        // Ensure the group has enough members to process the top 4
+        if (currentGroupMembers.length < 4) {
+          // If a group is not full, it makes promotion/relegation complex.
+          // For simplicity, we only run logic if minimum members exist.
+          // Handle groups with less than 4 members gracefully (e.g., keep them all).
+          if (currentGroupMembers.length > 0) {
+            newGroupMembers.push(...currentGroupMembers);
+          }
+        } else {
+          // --- Slot 1: Rank 1 (Igor Mijatov's Slot) ---
+          if (i === 0) {
+            // Highest Group (i=0): Rank 1 stays (Igor Mijatov)
+            newGroupMembers.push(currentGroupMembers[0]);
+          } else {
+            // All other Groups: Rank 4 from the higher group (i-1) is RELEGATED
+            const higherGroup = sortedGroups[i - 1];
+            if (higherGroup.members.length >= 4) {
+              newGroupMembers.push(higherGroup.members[3]); // Rank 4 from i-1 (e.g., Dario Jagarinec to Skupina 2)
+            } else {
+              // Fallback: If higher group wasn't full, keep current Rank 1
+              newGroupMembers.push(currentGroupMembers[0]);
+            }
+          }
+
+          // --- Slot 2 & 3: Rank 2 and Rank 3 always stay ---
+          newGroupMembers.push(currentGroupMembers[1]); // Rank 2 stays
+          newGroupMembers.push(currentGroupMembers[2]); // Rank 3 stays
+
+          // --- Slot 4: Rank 4 Player ---
+          if (i === numberOfGroups - 1) {
+            // Lowest Group (i=N-1): Rank 4 stays (Marko Jović)
+            newGroupMembers.push(currentGroupMembers[3]);
+          } else {
+            // All other Groups: Rank 1 from the lower group (i+1) is PROMOTED
+            const lowerGroup = sortedGroups[i + 1];
+            if (lowerGroup.members.length > 0) {
+              newGroupMembers.push(lowerGroup.members[0]); // Rank 1 from i+1 (e.g., Krešimir Lončarević to Skupina 1)
+            } else {
+              // Fallback: If lower group was empty, keep current Rank 4
+              newGroupMembers.push(currentGroupMembers[3]);
+            }
+          }
+        }
+
+        // --- Finalizing Group Members (Crucial for eliminating duplicates) ---
+
+        // Remove duplicates and limit to membersPerGroup
+        const uniqueMembers = newGroupMembers
+          .filter(
+            (member: any, index: number, self: any[]) =>
+              index === self.findIndex((m: any) => m.user_id === member.user_id)
+          )
+          .slice(0, membersPerGroup);
+
+        if (uniqueMembers.length === 0) continue;
+
+        // 4. Create New Group and Insert Members
+        const groupColor = currentGroup.color || colors[i % colors.length];
+        const groupName =
+          uniqueGroupNames[i] || `Grupa ${String.fromCharCode(65 + i)}`;
+
+        const { data: newGroup } = await supabase
+          .from("group")
+          .insert({
+            name: groupName,
+            color: groupColor,
+            is_deleted: false,
+          })
+          .select("*");
+
+        if (newGroup && newGroup[0]) {
+          const memberInserts = uniqueMembers.map((member: any) => ({
+            group_id: newGroup[0].id,
+            user_id: member.user_id,
+            is_deleted: false,
+          }));
+
+          const { error: memberError } = await supabase
+            .from("group_member")
+            .insert(memberInserts);
+
+          if (memberError) {
+            console.error("Error inserting group members:", memberError);
+            continue;
+          }
+
+          newGroups.push({
+            ...newGroup[0],
+            members: uniqueMembers,
+          });
+        }
+      }
+
+      await initialize();
+    } catch (error) {
+      console.error("Error generating groups:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // const createSchedule = async () => {
   //   const matches = await generateSchedule();
   // };
@@ -242,13 +463,17 @@ export default function GroupsPage() {
           </Typography>
         </div>
 
-        {/* <Box sx={{ mb: 2 }}>
-          <DatePicker
-            defaultValue={dayjs()}
-            label={"Odaberi mjesec"}
-            views={["month", "year"]}
-          />
-        </Box> */}
+        <Box sx={{ mb: 2 }}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              value={selectedMonth}
+              onChange={(newValue) => setSelectedMonth(newValue)}
+              label="Odaberi mjesec"
+              views={["month", "year"]}
+              format="MM/YYYY"
+            />
+          </LocalizationProvider>
+        </Box>
         <Button
           sx={{
             mb: 2,
@@ -259,7 +484,7 @@ export default function GroupsPage() {
           {showOnlyMine ? "Prikaži sve grupe" : "Prikaži samo moju grupu"}
         </Button>
         {isAdmin && (
-          <Box sx={{ mb: 2 }}>
+          <Box sx={{ mb: 2, display: "flex", gap: 2 }}>
             <Button
               variant="contained"
               onClick={() => setCreateGroup(true)}
@@ -267,6 +492,16 @@ export default function GroupsPage() {
             >
               Kreiraj grupu
             </Button>
+            {/* <Button
+              variant="outlined"
+              onClick={handleGenerateGroups}
+              startIcon={<Refresh />}
+              disabled={
+                !selectedMonth || !selectedMonth.isSame(dayjs(), "month")
+              }
+            >
+              Generiraj grupe
+            </Button> */}
           </Box>
         )}
         <div className="flex flex-wrap gap-4">
@@ -315,7 +550,7 @@ export default function GroupsPage() {
                       Članovi skupine:
                     </Typography>
                     <div className="flex flex-col gap-2">
-                      {reverse(sortBy(group.members, "pointsInGroup")).map(
+                      {reverse(sortBy(group.members, "points_in_group")).map(
                         (member, index) => (
                           <div
                             key={member.user.user_id}
